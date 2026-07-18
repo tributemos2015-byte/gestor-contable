@@ -633,7 +633,7 @@ async function abrirSunat(clienteId, destino) {
     });
   }
   // Abrir SUNAT (página de selección); la extensión hará el login y redirigirá al destino
-  const url = 'https://www.sunat.gob.pe/sol.html#gc=' + clienteId + '&dest=' + encodeURIComponent(urlDestino); window.open(url, '_blank');
+  window.open(urlDestino + "#gc=" + clienteId, "_blank");
 }
 
 async function eliminarCliente(id){
