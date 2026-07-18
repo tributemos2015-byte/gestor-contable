@@ -619,21 +619,14 @@ async function toggleActivo(id, nuevoEstado){
 
 // ----- Eliminar cliente -----
 async function abrirSunat(clienteId, destino) {
-  // destino: 'tramites' o 'declaraciones'
   const URLS = {
     tramites:      'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*',
     declaraciones: 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm?pestana=*&agrupacion=*&exe=55.1.1.1',
   };
   const urlDestino = URLS[destino] || URLS.tramites;
-
-  // Guardar cliente + destino en chrome.storage para que la extensión lo lea
-  if (typeof chrome !== 'undefined' && chrome.storage) {
-    chrome.storage.local.set({
-      sunat_cliente: { clienteId, destino: urlDestino, timestamp: Date.now() }
-    });
-  }
-  // Abrir SUNAT (página de selección); la extensión hará el login y redirigirá al destino
-  window.open(urlDestino + "#gc=" + clienteId, "_blank");
+  // Pasar clienteId y destino en el hash de sol.html (igual que funcionaba para Trámites)
+  const url = 'https://www.sunat.gob.pe/sol.html#gc=' + clienteId + '&dest=' + encodeURIComponent(urlDestino);
+  window.open(url, '_blank');
 }
 
 async function eliminarCliente(id){
