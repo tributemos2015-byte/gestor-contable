@@ -545,7 +545,7 @@ async function cargarClientes(){
           <span class="tag" style="background:${c.activo ? 'var(--green-tint)' : 'var(--red-tint)'};color:${c.activo ? 'var(--green)' : 'var(--red)'};">${c.activo ? 'Activo' : 'Pausado'}</span>
         </td>
         <td style="padding:10px 8px;text-align:right;">
-          <button onclick="abrirSunat('${c.id}')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:6px;">🔑 SUNAT</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
+          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:6px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
           <button onclick="eliminarCliente('${c.id}')" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--red);">Eliminar</button>
         </td>
       </tr>
@@ -618,12 +618,21 @@ async function toggleActivo(id, nuevoEstado){
 }
 
 // ----- Eliminar cliente -----
-async function abrirSunat(clienteId) {
-  // Guardar cliente en chrome.storage para que la extensión lo lea
+async function abrirSunat(clienteId, destino) {
+  // destino: 'tramites' o 'declaraciones'
+  const URLS = {
+    tramites:      'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*',
+    declaraciones: 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm?pestana=*&agrupacion=*&exe=55.1.1.1',
+  };
+  const urlDestino = URLS[destino] || URLS.tramites;
+
+  // Guardar cliente + destino en chrome.storage para que la extensión lo lea
   if (typeof chrome !== 'undefined' && chrome.storage) {
-    chrome.storage.local.set({ sunat_cliente: { clienteId, timestamp: Date.now() } });
+    chrome.storage.local.set({
+      sunat_cliente: { clienteId, destino: urlDestino, timestamp: Date.now() }
+    });
   }
-  // Abrir SUNAT en nueva pestaña
+  // Abrir SUNAT (página de selección); la extensión hará el login y redirigirá al destino
   window.open('https://www.sunat.gob.pe/sol.html', '_blank');
 }
 
