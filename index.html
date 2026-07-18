@@ -494,7 +494,7 @@ function toggleSub(el){
 
 // ----- Configuración de la API -----
 // Debe coincidir con el puerto de src/server.js (API_PORT en .env, por defecto 3001)
-const API_URL = 'http://161.153.200.73:3001';
+const API_URL = 'https://161-153-200-73.nip.io';
 document.getElementById('api-url-shown').textContent = API_URL;
 
 // ----- Navegación entre vistas -----
@@ -545,7 +545,7 @@ async function cargarClientes(){
           <span class="tag" style="background:${c.activo ? 'var(--green-tint)' : 'var(--red-tint)'};color:${c.activo ? 'var(--green)' : 'var(--red)'};">${c.activo ? 'Activo' : 'Pausado'}</span>
         </td>
         <td style="padding:10px 8px;text-align:right;">
-          <button onclick="abrirSunat('${c.id}')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:6px;">🔑 SUNAT</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
+          <button onclick="abrirSunat('${c.id}')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:6px;">🔑 SUNAT</button><button onclick="abrirSunat('${c.id}')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:6px;">🔑 SUNAT</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
           <button onclick="eliminarCliente('${c.id}')" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--red);">Eliminar</button>
         </td>
       </tr>
@@ -624,6 +624,13 @@ async function abrirSunat(clienteId) {
     chrome.storage.local.set({ sunat_cliente: { clienteId, timestamp: Date.now() } });
   }
   // Abrir SUNAT en nueva pestaña
+  window.open('https://www.sunat.gob.pe/sol.html', '_blank');
+}
+
+async function abrirSunat(clienteId) {
+  if (typeof chrome !== 'undefined' && chrome.storage) {
+    chrome.storage.local.set({ sunat_cliente: { clienteId, timestamp: Date.now() } });
+  }
   window.open('https://www.sunat.gob.pe/sol.html', '_blank');
 }
 
