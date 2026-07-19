@@ -625,14 +625,22 @@ async function abrirSunat(clienteId, destino) {
   };
   const urlDestino = DESTINOS[destino] || DESTINOS.tramites;
 
-  // 1. Avisar a la extensión via postMessage (el content script escucha esto)
-  window.postMessage({ type: 'GC_OPEN_SUNAT', clienteId, destino: urlDestino }, '*');
+  // Enviar al content script de la extensión via postMessage
+  // El content script escucha y guarda en chrome.storage, luego responde GC_READY
+  await new Promise((resolve) => {
+    const handler = (event) => {
+      if (event.data && event.data.type === 'GC_READY') {
+        window.removeEventListener('message', handler);
+        resolve();
+      }
+    };
+    window.addEventListener('message', handler);
+    window.postMessage({ type: 'GC_OPEN_SUNAT', clienteId, destino: urlDestino }, '*');
+    // Timeout por si la extensión no está instalada
+    setTimeout(resolve, 600);
+  });
 
-  // 2. Esperar que el content script guarde en storage, luego abrir SUNAT
-  await new Promise(r => setTimeout(r, 300));
-
-  const loginUrl = 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*';
-  window.open(loginUrl, '_blank');
+  window.open(urlDestino, '_blank');
 }
 
 async function eliminarCliente(id){
