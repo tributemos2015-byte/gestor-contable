@@ -170,6 +170,7 @@
 
     <div class="nav-group-label">Buzones y consultas</div>
     <a class="nav-item" href="#" id="nav-buzonsol" onclick="mostrarVista('buzonsol');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>Buzón SOL</a>
+    <a class="nav-item" href="#" id="nav-buzonelectronico" onclick="mostrarVista('buzonelectronico');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 4v16"/></svg>Buzón Electrónico</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>Buzón SUNAFIL</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Consulta CPE SUNAT</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/></svg>Informe para cliente</a>
@@ -226,6 +227,17 @@
           <input id="buzonsol-buscador" type="text" placeholder="Buscar por RUC, razón social o asunto..." oninput="filtrarNotificaciones()"
             style="width:100%;padding:9px 11px 9px 33px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;">
         </div>
+        <button title="Actualizar" onclick="cargarNotificaciones()" style="width:38px;height:38px;flex-shrink:0;border-radius:8px;border:1px solid var(--line);background:var(--teal-tint);color:var(--teal);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.5 8.5 0 1 1-4-7.2"/><path d="M21 4v6h-6"/></svg>
+        </button>
+        <button title="Descargar" style="width:38px;height:38px;flex-shrink:0;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>
+        </button>
+        <button title="Filtros" onclick="document.getElementById('buzonsol-filtros-extra').classList.toggle('open')" style="width:38px;height:38px;flex-shrink:0;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        </button>
+      </div>
+      <div id="buzonsol-filtros-extra" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
         <select id="buzonsol-filtro-cliente" onchange="filtrarNotificaciones()"
           style="flex:1;min-width:200px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;">
           <option value="">Todos los clientes</option>
@@ -235,6 +247,13 @@
           <option value="">Todos los estados</option>
           <option value="pendiente">Pendiente WhatsApp</option>
           <option value="enviado">WhatsApp enviado</option>
+        </select>
+        <select id="buzonsol-filtro-fecha" onchange="filtrarNotificaciones()"
+          style="min-width:170px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;">
+          <option value="">Todo el historial</option>
+          <option value="7">Últimos 7 días</option>
+          <option value="30">Últimos 30 días</option>
+          <option value="90">Últimos 3 meses</option>
         </select>
       </div>
 
@@ -257,6 +276,51 @@
           <p style="color:var(--ink-soft);font-size:14px;margin:0;">Selecciona un mensaje para ver su contenido</p>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ============ VISTA: BUZÓN ELECTRÓNICO ============ -->
+    <div id="view-buzonelectronico" style="display:none;">
+      <div class="hero" style="margin-bottom:16px;">
+        <div>
+          <h1>Buzón Electrónico</h1>
+          <p>Historial completo de comunicaciones SUNAT, ordenado por fecha.</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="buzonelec-contador" style="font-size:13px;color:var(--ink-soft);font-weight:600;"></span>
+          <button class="stat-btn" style="width:auto;padding:9px 16px;" onclick="cargarBuzonElectronico()">↻ Actualizar</button>
+        </div>
+      </div>
+
+      <div id="buzonelec-api-status" class="events-strip" style="display:none;background:var(--red-tint);border-color:#E8B4AC;margin-bottom:14px;">
+        <b>⚠ No se pudo conectar con la API.</b>
+        <span id="buzonelec-api-url-shown"></span>
+      </div>
+
+      <!-- Toolbar -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;">
+        <div style="position:relative;flex:2;min-width:200px;">
+          <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;opacity:.4;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="buzonelec-buscador" type="text" placeholder="Buscar por RUC, razón social o asunto..." oninput="filtrarBuzonElectronico()"
+            style="width:100%;padding:9px 11px 9px 33px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;">
+        </div>
+        <select id="buzonelec-filtro-cliente" onchange="filtrarBuzonElectronico()"
+          style="flex:1;min-width:220px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;">
+          <option value="">Todos los clientes</option>
+        </select>
+        <select id="buzonelec-filtro-periodo" onchange="filtrarBuzonElectronico()"
+          style="min-width:170px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;">
+          <option value="">Todo el historial</option>
+          <option value="7">Últimos 7 días</option>
+          <option value="30">Últimos 30 días</option>
+          <option value="90">Últimos 3 meses</option>
+          <option value="365">Último año</option>
+        </select>
+      </div>
+
+      <!-- Timeline agrupado por fecha -->
+      <div id="buzonelec-timeline">
+        <div style="padding:24px 16px;color:var(--ink-soft);font-size:13.5px;text-align:center;">Cargando historial...</div>
       </div>
     </div>
 
@@ -511,11 +575,14 @@ function mostrarVista(vista){
   document.getElementById('view-dashboard').style.display = vista === 'dashboard' ? 'block' : 'none';
   document.getElementById('view-clientes').style.display = vista === 'clientes' ? 'block' : 'none';
   document.getElementById('view-buzonsol').style.display = vista === 'buzonsol' ? 'block' : 'none';
+  document.getElementById('view-buzonelectronico').style.display = vista === 'buzonelectronico' ? 'block' : 'none';
   document.getElementById('nav-dashboard').classList.toggle('active', vista === 'dashboard');
   document.getElementById('nav-clientes').classList.toggle('active', vista === 'clientes');
   document.getElementById('nav-buzonsol').classList.toggle('active', vista === 'buzonsol');
+  document.getElementById('nav-buzonelectronico').classList.toggle('active', vista === 'buzonelectronico');
   if (vista === 'clientes') cargarClientes();
   if (vista === 'buzonsol') cargarNotificaciones();
+  if (vista === 'buzonelectronico') cargarBuzonElectronico();
 }
 
 // ----- Modal nuevo cliente -----
@@ -726,6 +793,7 @@ function filtrarNotificaciones(){
   const texto = document.getElementById('buzonsol-buscador').value.trim().toLowerCase();
   const clienteSel = document.getElementById('buzonsol-filtro-cliente').value;
   const estadoSel = document.getElementById('buzonsol-filtro-estado').value;
+  const diasSel = document.getElementById('buzonsol-filtro-fecha').value;
 
   const filtradas = buzonsolTodas.filter(n => {
     const cliente = n.razonSocial || '';
@@ -733,7 +801,15 @@ function filtrarNotificaciones(){
     const coincideCliente = !clienteSel || cliente === clienteSel;
     const coincideTexto = !texto || [cliente, n.ruc, n.asunto].join(' ').toLowerCase().includes(texto);
     const coincideEstado = !estadoSel || (estadoSel === 'enviado' ? enviado : !enviado);
-    return coincideCliente && coincideTexto && coincideEstado;
+    let coincideFecha = true;
+    if (diasSel) {
+      const d = new Date(n.creadoEn);
+      if (!isNaN(d.getTime())) {
+        const dias = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
+        coincideFecha = dias <= Number(diasSel);
+      }
+    }
+    return coincideCliente && coincideTexto && coincideEstado && coincideFecha;
   });
 
   renderLista(filtradas);
@@ -794,64 +870,229 @@ function seleccionarNotif(idx, el){
     const texto = document.getElementById('buzonsol-buscador').value.trim().toLowerCase();
     const clienteSel = document.getElementById('buzonsol-filtro-cliente').value;
     const estadoSel = document.getElementById('buzonsol-filtro-estado').value;
+    const diasSel = document.getElementById('buzonsol-filtro-fecha').value;
     const cliente = n.razonSocial || '';
     const enviado = n.whatsappEnviado === true || n.estado === 'enviado';
+    let coincideFecha = true;
+    if (diasSel) {
+      const d = new Date(n.creadoEn);
+      if (!isNaN(d.getTime())) coincideFecha = ((Date.now() - d.getTime()) / (1000*60*60*24)) <= Number(diasSel);
+    }
     return (!clienteSel || cliente === clienteSel) &&
            (!texto || [cliente, n.ruc, n.asunto].join(' ').toLowerCase().includes(texto)) &&
-           (!estadoSel || (estadoSel === 'enviado' ? enviado : !enviado));
+           (!estadoSel || (estadoSel === 'enviado' ? enviado : !enviado)) &&
+           coincideFecha;
   });
 
   const n = filtradas[idx];
   buzonsolSeleccionada = n;
   const enviado = n.whatsappEnviado === true || n.estado === 'enviado';
+  const leido = n.leido === true;
 
   document.getElementById('buzonsol-detalle').innerHTML = `
-    <div style="padding:28px 32px;width:100%;height:100%;overflow-y:auto;box-sizing:border-box;">
-      <!-- Chips -->
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <span style="font-size:12px;padding:3px 10px;border-radius:999px;background:var(--teal-tint);color:var(--teal);font-weight:700;">SUNAT</span>
-        <span style="font-size:12px;padding:3px 10px;border-radius:999px;background:var(--line);color:var(--ink-soft);font-weight:600;">Mensaje</span>
-        <span style="margin-left:auto;font-size:12px;padding:3px 10px;border-radius:999px;
-          background:${enviado ? 'var(--green-tint)' : 'var(--amber-tint)'};
-          color:${enviado ? 'var(--green)' : 'var(--amber)'};font-weight:700;">
-          ${enviado ? '✓ WhatsApp enviado' : '● WhatsApp pendiente'}
-        </span>
+    <div style="width:100%;height:100%;overflow-y:auto;box-sizing:border-box;display:flex;flex-direction:column;">
+
+      <!-- Header: título + botones de acción -->
+      <div style="padding:22px 28px 16px;border-bottom:1px solid var(--line);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
+          <h2 style="font-family:'Inter',sans-serif;font-size:18px;font-weight:700;margin:0;line-height:1.35;flex:1;min-width:220px;">${escapeHtml(n.asunto || '(sin asunto)')}</h2>
+          <div style="display:flex;gap:8px;flex-shrink:0;">
+            <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm" target="_blank" style="display:flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink);text-decoration:none;background:#fff;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
+              Menú SOL
+            </a>
+            <button onclick="crearTareaDesdeNotif('${n.id}')" style="display:flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink);background:#fff;cursor:pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4" width="17" height="17" rx="2"/><path d="m7.5 12 2.3 2.3L16.5 9"/></svg>
+              Crear Tarea
+            </button>
+            <button onclick="verDetalleCompleto('${n.id}')" style="display:flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink);background:#fff;cursor:pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
+              Ver detalle
+            </button>
+          </div>
+        </div>
+
+        <!-- Meta info: empresa, RUC, fecha -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--ink-soft);margin-bottom:12px;">
+          <span style="display:flex;align-items:center;gap:5px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V6a1 1 0 0 1 1-1h11l4 4v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M9 21v-6h6v6"/><path d="M9 9h6"/></svg>
+            <b style="color:var(--ink);">${escapeHtml(n.razonSocial || '—')}</b>
+          </span>
+          <span style="display:flex;align-items:center;gap:5px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4" width="17" height="17" rx="2"/></svg>
+            <span class="num">${escapeHtml(n.ruc || '—')}</span>
+          </span>
+          <span style="display:flex;align-items:center;gap:5px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+            <span class="num">${escapeHtml(formatearFecha(n.creadoEn))}</span>
+          </span>
+        </div>
+
+        <!-- Chips: Leído / SUNAT / Mensaje -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 10px;border-radius:999px;background:${leido ? 'var(--green-tint)' : 'var(--amber-tint)'};color:${leido ? 'var(--green)' : 'var(--amber)'};font-weight:700;">
+            ${leido ? '✓ Leído' : '● No leído'}
+          </span>
+          <span style="font-size:12px;padding:4px 10px;border-radius:999px;background:var(--teal-tint);color:var(--teal);font-weight:700;">SUNAT</span>
+          <span style="font-size:12px;padding:4px 10px;border-radius:999px;background:var(--line);color:var(--ink-soft);font-weight:600;">Mensaje</span>
+          <span style="font-size:12px;padding:4px 10px;border-radius:999px;background:${enviado ? 'var(--green-tint)' : 'var(--amber-tint)'};color:${enviado ? 'var(--green)' : 'var(--amber)'};font-weight:700;">
+            ${enviado ? '✓ WhatsApp enviado' : '● WhatsApp pendiente'}
+          </span>
+        </div>
       </div>
 
-      <!-- Asunto -->
-      <h2 style="font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin:0 0 18px;line-height:1.3;">${escapeHtml(n.asunto || '(sin asunto)')}</h2>
+      <!-- Contenido del mensaje -->
+      <div style="padding:22px 28px;flex:1;">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:12px;">Contenido del Mensaje</div>
+        <div style="font-size:14px;line-height:1.75;color:var(--ink);white-space:pre-line;">${
+          n.contenido ? escapeHtml(n.contenido) :
+          '<span style="color:var(--ink-soft);font-style:italic;">Esta notificación aún no tiene el cuerpo del mensaje guardado. Entra al Buzón SOL de SUNAT con el botón <b>Trámites</b> del cliente para ver el contenido completo.</span>'
+        }</div>
 
-      <!-- Info cliente -->
-      <div style="background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:3px;">Empresa</div>
-          <div style="font-size:14px;font-weight:600;">${escapeHtml(n.razonSocial || '—')}</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:3px;">RUC</div>
-          <div style="font-size:14px;font-weight:600;font-family:'JetBrains Mono',monospace;">${escapeHtml(n.ruc || '—')}</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:3px;">Fecha SUNAT</div>
-          <div style="font-size:13.5px;">${escapeHtml(formatearFecha(n.fechaSunat))}</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:3px;">Detectada</div>
-          <div style="font-size:13.5px;">${escapeHtml(formatearFecha(n.creadoEn))}</div>
+        <div style="display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-size:13px;margin-top:20px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          0 adjuntos
         </div>
       </div>
 
-      <!-- Adjuntos placeholder -->
-      <div style="display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-size:13px;margin-bottom:18px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        0 adjuntos
-      </div>
-
-      <!-- Nota -->
-      <div style="background:var(--primary-tint);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--primary-dark);">
-        <b>Nota:</b> El contenido completo del mensaje se puede ver entrando al Buzón SOL de SUNAT con el botón <b>Trámites</b> del cliente.
+      <!-- Tareas vinculadas -->
+      <div style="padding:18px 28px;border-top:1px solid var(--line);background:var(--paper);">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4" width="17" height="17" rx="2"/><path d="m7.5 12 2.3 2.3L16.5 9"/></svg>
+          Tareas vinculadas
+        </div>
+        <div style="font-size:13px;color:var(--ink-soft);">Sin tareas vinculadas.</div>
       </div>
     </div>`;
+}
+
+function crearTareaDesdeNotif(id){
+  alert('Función "Crear Tarea" pendiente de conectar con el módulo de Tareas.');
+}
+function verDetalleCompleto(id){
+  alert('Función "Ver detalle" pendiente de conectar con la vista ampliada.');
+}
+
+// ===== BUZÓN ELECTRÓNICO: historial completo agrupado por fecha =====
+let buzonelecTodas = [];
+
+function nombreMes(m){
+  return ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][m];
+}
+
+function etiquetaGrupoFecha(fecha){
+  const d = new Date(fecha);
+  const hoy = new Date();
+  const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1);
+  if (d.toDateString() === hoy.toDateString()) return 'Hoy';
+  if (d.toDateString() === ayer.toDateString()) return 'Ayer';
+  const dias = Math.floor((hoy - d) / 86400000);
+  if (dias < 7) return 'Esta semana';
+  if (d.getMonth() === hoy.getMonth() && d.getFullYear() === hoy.getFullYear()) return 'Este mes';
+  return `${nombreMes(d.getMonth())} ${d.getFullYear()}`;
+}
+
+async function cargarBuzonElectronico(){
+  const timeline = document.getElementById('buzonelec-timeline');
+  const apiStatus = document.getElementById('buzonelec-api-status');
+  timeline.innerHTML = '<div style="padding:24px 16px;color:var(--ink-soft);font-size:13.5px;text-align:center;">Cargando historial...</div>';
+  try {
+    const res = await fetch(`${API_URL}/notificaciones`);
+    if (!res.ok) throw new Error('Respuesta no OK');
+    const data = await res.json();
+    apiStatus.style.display = 'none';
+    buzonelecTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => new Date(b.creadoEn) - new Date(a.creadoEn));
+
+    const select = document.getElementById('buzonelec-filtro-cliente');
+    const clientesUnicos = [...new Set(buzonelecTodas.map(n => n.razonSocial || '').filter(Boolean))].sort();
+    select.innerHTML = '<option value="">Todos los clientes</option>' +
+      clientesUnicos.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+
+    filtrarBuzonElectronico();
+  } catch (err) {
+    console.error(err);
+    apiStatus.style.display = 'flex';
+    timeline.innerHTML = '<div style="padding:24px 16px;color:var(--ink-soft);font-size:13.5px;text-align:center;">No se pudo cargar el historial.</div>';
+  }
+}
+
+function filtrarBuzonElectronico(){
+  const texto = document.getElementById('buzonelec-buscador').value.trim().toLowerCase();
+  const clienteSel = document.getElementById('buzonelec-filtro-cliente').value;
+  const periodoSel = document.getElementById('buzonelec-filtro-periodo').value;
+  const ahora = Date.now();
+
+  const filtradas = buzonelecTodas.filter(n => {
+    const cliente = n.razonSocial || '';
+    const coincideCliente = !clienteSel || cliente === clienteSel;
+    const coincideTexto = !texto || [cliente, n.ruc, n.asunto].join(' ').toLowerCase().includes(texto);
+    let coincidePeriodo = true;
+    if (periodoSel) {
+      const d = new Date(n.creadoEn);
+      if (!isNaN(d.getTime())) {
+        coincidePeriodo = (ahora - d.getTime()) < (Number(periodoSel) * 86400000);
+      }
+    }
+    return coincideCliente && coincideTexto && coincidePeriodo;
+  });
+
+  renderTimeline(filtradas);
+}
+
+function renderTimeline(lista){
+  const el = document.getElementById('buzonelec-timeline');
+  const contador = document.getElementById('buzonelec-contador');
+  contador.textContent = `${lista.length} comunicación${lista.length !== 1 ? 'es' : ''}`;
+
+  if (lista.length === 0){
+    el.innerHTML = '<div style="padding:24px 16px;color:var(--ink-soft);font-size:13.5px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);">No hay comunicaciones que coincidan con el filtro.</div>';
+    return;
+  }
+
+  // Agrupar por etiqueta de fecha (Hoy, Ayer, Esta semana, Este mes, Mes Año...)
+  const grupos = {};
+  const ordenGrupos = [];
+  lista.forEach(n => {
+    const etiqueta = etiquetaGrupoFecha(n.creadoEn);
+    if (!grupos[etiqueta]) { grupos[etiqueta] = []; ordenGrupos.push(etiqueta); }
+    grupos[etiqueta].push(n);
+  });
+
+  el.innerHTML = ordenGrupos.map(etiqueta => `
+    <div style="margin-bottom:22px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);white-space:nowrap;">${etiqueta}</span>
+        <div style="flex:1;height:1px;background:var(--line);"></div>
+        <span style="font-size:11.5px;color:var(--ink-soft);">${grupos[etiqueta].length}</span>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;">
+        ${grupos[etiqueta].map((n, i) => {
+          const enviado = n.whatsappEnviado === true || n.estado === 'enviado';
+          const esUltimo = i === grupos[etiqueta].length - 1;
+          return `
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 18px;${esUltimo ? '' : 'border-bottom:1px solid var(--line);'}">
+            <div style="width:36px;height:36px;border-radius:9px;background:var(--teal-tint);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="m3 7 9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                <div style="font-weight:700;font-size:13.5px;">${escapeHtml(n.razonSocial || '')} <span style="font-weight:400;color:var(--ink-soft);font-size:12px;">· RUC ${escapeHtml(n.ruc || '—')}</span></div>
+                <span style="font-size:11.5px;color:var(--ink-soft);white-space:nowrap;">${formatearFecha(n.creadoEn)}</span>
+              </div>
+              <div style="font-size:13px;margin:4px 0 6px;">${escapeHtml(n.asunto || '(sin asunto)')}</div>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 7px;border-radius:999px;background:var(--teal-tint);color:var(--teal);font-weight:600;">SUNAT</span>
+                <span style="font-size:11px;padding:2px 7px;border-radius:999px;background:${enviado ? 'var(--green-tint)' : 'var(--amber-tint)'};color:${enviado ? 'var(--green)' : 'var(--amber)'};font-weight:600;">
+                  ${enviado ? '✓ WhatsApp enviado' : '● WhatsApp pendiente'}
+                </span>
+                ${n.fechaSunat ? `<span style="font-size:11px;color:var(--ink-soft);">Fecha SUNAT: ${escapeHtml(formatearFecha(n.fechaSunat))}</span>` : ''}
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
 }
 </script>
 </body>
