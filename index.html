@@ -747,11 +747,11 @@ function formatearFechaCorta(valor){
   try {
     const d = new Date(valor);
     if (isNaN(d.getTime())) return String(valor);
-    const hoy = new Date();
-    if (d.toDateString() === hoy.toDateString()) {
-      return d.toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit' });
-    }
-    return d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
+    // Siempre muestra fecha corta + hora, para no confundir mensajes
+    // de hoy con los de otros días (evita depender de zona horaria del navegador).
+    const fecha = d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit' });
+    const hora = d.toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit' });
+    return `${fecha} · ${hora}`;
   } catch { return String(valor); }
 }
 
