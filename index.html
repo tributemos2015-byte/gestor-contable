@@ -625,23 +625,22 @@ async function abrirSunat(clienteId, destino) {
   };
   const urlDestino = DESTINOS[destino] || DESTINOS.tramites;
 
-  // Enviar al content script de la extensión via postMessage
-  // El content script escucha y guarda en chrome.storage, luego responde GC_READY
-  await new Promise((resolve) => {
-    const handler = (event) => {
-      if (event.data && event.data.type === 'GC_READY') {
-        window.removeEventListener('message', handler);
-        resolve();
-      }
-    };
-    window.addEventListener('message', handler);
-    window.postMessage({ type: 'GC_OPEN_SUNAT', clienteId, destino: urlDestino }, '*');
-    // Timeout por si la extensión no está instalada
-    setTimeout(resolve, 600);
-  });
+  // Avisar a la extensión (content script) que reenvía al background.
+  // El background abre la pestaña de SUNAT y asocia el cliente a esa tab.
+  window.postMessage({ type: 'GC_OPEN_SUNAT', clienteId, destino: urlDestino }, '*');
 
-  window.open(urlDestino, '_blank');
+  // Fallback: si no hay extensión, abrir manualmente en 500ms
+  setTimeout(() => {
+    if (!window.__gcExtensionActive) {
+      window.open(urlDestino, '_blank');
+    }
+  }, 500);
 }
+
+// Detectar si la extensión está activa
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'GC_EXTENSION_ACTIVE') window.__gcExtensionActive = true;
+});
 
 async function eliminarCliente(id){
   if (!confirm('¿Eliminar este cliente? Esta acción no se puede deshacer.')) return;
