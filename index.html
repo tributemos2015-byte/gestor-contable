@@ -747,9 +747,8 @@ function formatearFechaCorta(valor){
   try {
     const d = new Date(valor);
     if (isNaN(d.getTime())) return String(valor);
-    // Siempre muestra fecha corta + hora, para no confundir mensajes
-    // de hoy con los de otros días (evita depender de zona horaria del navegador).
-    const fecha = d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit' });
+    // Siempre muestra fecha completa (con año) + hora.
+    const fecha = d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
     const hora = d.toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit' });
     return `${fecha} · ${hora}`;
   } catch { return String(valor); }
@@ -772,7 +771,7 @@ async function cargarNotificaciones(){
     if (!res.ok) throw new Error('Respuesta no OK');
     const data = await res.json();
     apiStatus.style.display = 'none';
-    buzonsolTodas = Array.isArray(data) ? data : [];
+    buzonsolTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => new Date(b.fechaSunat || b.creadoEn) - new Date(a.fechaSunat || a.creadoEn));
 
     // Poblar filtro de clientes
     const select = document.getElementById('buzonsol-filtro-cliente');
@@ -842,7 +841,7 @@ function renderLista(lista){
          onmouseout="this.style.background='${seleccionada ? 'var(--primary-tint)' : (nueva ? '#FFFBF8' : 'transparent')}'">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:5px;">
           <span style="font-weight:700;font-size:13px;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(cliente)}</span>
-          <span style="font-size:11px;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;">${formatearFechaCorta(n.creadoEn)}</span>
+          <span style="font-size:11px;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;">${formatearFechaCorta(n.fechaSunat || n.creadoEn)}</span>
         </div>
         <div style="font-size:12.5px;font-weight:${nueva ? '600' : '400'};color:var(--ink);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(n.asunto || '(sin asunto)')}</div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
@@ -1001,7 +1000,7 @@ async function cargarBuzonElectronico(){
     if (!res.ok) throw new Error('Respuesta no OK');
     const data = await res.json();
     apiStatus.style.display = 'none';
-    buzonelecTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => new Date(b.creadoEn) - new Date(a.creadoEn));
+    buzonelecTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => new Date(b.fechaSunat || b.creadoEn) - new Date(a.fechaSunat || a.creadoEn));
 
     const select = document.getElementById('buzonelec-filtro-cliente');
     const clientesUnicos = [...new Set(buzonelecTodas.map(n => n.razonSocial || '').filter(Boolean))].sort();
@@ -1053,7 +1052,7 @@ function renderTimeline(lista){
   const grupos = {};
   const ordenGrupos = [];
   lista.forEach(n => {
-    const etiqueta = etiquetaGrupoFecha(n.creadoEn);
+    const etiqueta = etiquetaGrupoFecha(n.fechaSunat || n.creadoEn);
     if (!grupos[etiqueta]) { grupos[etiqueta] = []; ordenGrupos.push(etiqueta); }
     grupos[etiqueta].push(n);
   });
@@ -1077,7 +1076,7 @@ function renderTimeline(lista){
             <div style="flex:1;min-width:0;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
                 <div style="font-weight:700;font-size:13.5px;">${escapeHtml(n.razonSocial || '')} <span style="font-weight:400;color:var(--ink-soft);font-size:12px;">· RUC ${escapeHtml(n.ruc || '—')}</span></div>
-                <span style="font-size:11.5px;color:var(--ink-soft);white-space:nowrap;">${formatearFecha(n.creadoEn)}</span>
+                <span style="font-size:11.5px;color:var(--ink-soft);white-space:nowrap;">${formatearFecha(n.fechaSunat || n.creadoEn)}</span>
               </div>
               <div style="font-size:13px;margin:4px 0 6px;">${escapeHtml(n.asunto || '(sin asunto)')}</div>
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
@@ -1085,7 +1084,7 @@ function renderTimeline(lista){
                 <span style="font-size:11px;padding:2px 7px;border-radius:999px;background:${enviado ? 'var(--green-tint)' : 'var(--amber-tint)'};color:${enviado ? 'var(--green)' : 'var(--amber)'};font-weight:600;">
                   ${enviado ? '✓ WhatsApp enviado' : '● WhatsApp pendiente'}
                 </span>
-                ${n.fechaSunat ? `<span style="font-size:11px;color:var(--ink-soft);">Fecha SUNAT: ${escapeHtml(formatearFecha(n.fechaSunat))}</span>` : ''}
+                <span style="font-size:11px;color:var(--ink-soft);">Detectado: ${escapeHtml(formatearFecha(n.creadoEn))}</span>
               </div>
             </div>
           </div>`;
