@@ -625,10 +625,13 @@ async function abrirSunat(clienteId, destino) {
   };
   const urlDestino = DESTINOS[destino] || DESTINOS.tramites;
 
-  // Pasar clienteId y destino en la URL de login de SUNAT para que la extensión lo lea
-  const loginBase = 'https://api-seguridad.sunat.gob.pe/v1/clientessol/';
-  const loginUrl  = `${loginBase}?gc=${encodeURIComponent(clienteId)}&dest=${encodeURIComponent(urlDestino)}&lang=es-PE&showDni=true&showLanguages=false&originalUrl=${encodeURIComponent(urlDestino)}`;
+  // 1. Avisar a la extensión via postMessage (el content script escucha esto)
+  window.postMessage({ type: 'GC_OPEN_SUNAT', clienteId, destino: urlDestino }, '*');
 
+  // 2. Esperar que el content script guarde en storage, luego abrir SUNAT
+  await new Promise(r => setTimeout(r, 300));
+
+  const loginUrl = 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*';
   window.open(loginUrl, '_blank');
 }
 
