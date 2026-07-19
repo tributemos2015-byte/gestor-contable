@@ -944,7 +944,7 @@ function seleccionarNotif(idx, el){
           </span>
           <span style="display:flex;align-items:center;gap:5px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
-            <span class="num">${escapeHtml(formatearFecha(n.creadoEn))}</span>
+            <span class="num">${escapeHtml(formatearFecha(n.fechaSunat || n.creadoEn))}</span>
           </span>
         </div>
 
@@ -969,9 +969,17 @@ function seleccionarNotif(idx, el){
           '<span style="color:var(--ink-soft);font-style:italic;">Esta notificación aún no tiene el cuerpo del mensaje guardado. Entra al Buzón SOL de SUNAT con el botón <b>Trámites</b> del cliente para ver el contenido completo.</span>'
         }</div>
 
-        <div style="display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-size:13px;margin-top:20px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-          0 adjuntos
+        <div style="margin-top:20px;">
+          <div style="display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-size:13px;margin-bottom:${(n.adjuntos && n.adjuntos.length) ? '10px' : '0'};">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            ${(n.adjuntos && n.adjuntos.length) ? n.adjuntos.length + (n.adjuntos.length === 1 ? ' adjunto' : ' adjuntos') : '0 adjuntos'}
+          </div>
+          ${(n.adjuntos && n.adjuntos.length) ? n.adjuntos.map(a => `
+            <a href="${a.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;text-decoration:none;background:#fff;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              <span style="flex:1;font-size:13px;font-weight:600;color:var(--ink);word-break:break-all;">${escapeHtml(a.nombre || 'archivo')}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-soft)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+            </a>`).join('') : ''}
         </div>
       </div>
 
