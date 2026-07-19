@@ -618,6 +618,15 @@ async function toggleActivo(id, nuevoEstado){
 }
 
 // ----- Eliminar cliente -----
+// Detectar si la extensión está activa (se setea al cargar la página)
+window.__gcExtensionActive = false;
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'GC_EXTENSION_ACTIVE') {
+    window.__gcExtensionActive = true;
+    console.log('[Panel] Extensión GestorContable detectada');
+  }
+});
+
 async function abrirSunat(clienteId, destino) {
   const DESTINOS = {
     tramites:      'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*',
@@ -625,22 +634,14 @@ async function abrirSunat(clienteId, destino) {
   };
   const urlDestino = DESTINOS[destino] || DESTINOS.tramites;
 
-  // Avisar a la extensión (content script) que reenvía al background.
-  // El background abre la pestaña de SUNAT y asocia el cliente a esa tab.
-  window.postMessage({ type: 'GC_OPEN_SUNAT', clienteId, destino: urlDestino }, '*');
-
-  // Fallback: si no hay extensión, abrir manualmente en 500ms
-  setTimeout(() => {
-    if (!window.__gcExtensionActive) {
-      window.open(urlDestino, '_blank');
-    }
-  }, 500);
+  if (window.__gcExtensionActive) {
+    // La extensión abre la pestaña y llena las credenciales
+    window.postMessage({ type: 'GC_OPEN_SUNAT', clienteId, destino: urlDestino }, '*');
+  } else {
+    // Sin extensión: abrir SUNAT manualmente (sin autocompletar)
+    window.open(urlDestino, '_blank');
+  }
 }
-
-// Detectar si la extensión está activa
-window.addEventListener('message', (e) => {
-  if (e.data && e.data.type === 'GC_EXTENSION_ACTIVE') window.__gcExtensionActive = true;
-});
 
 async function eliminarCliente(id){
   if (!confirm('¿Eliminar este cliente? Esta acción no se puede deshacer.')) return;
