@@ -619,15 +619,17 @@ async function toggleActivo(id, nuevoEstado){
 
 // ----- Eliminar cliente -----
 async function abrirSunat(clienteId, destino) {
-  const URLS = {
+  const DESTINOS = {
     tramites:      'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm?pestana=*&agrupacion=*',
     declaraciones: 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm?pestana=*&agrupacion=*&exe=55.1.1.1',
   };
-  const urlDestino = URLS[destino] || URLS.tramites;
-  if (typeof chrome !== 'undefined' && chrome.storage) {
-    chrome.storage.local.set({ sunat_cliente: { clienteId, destino: urlDestino, timestamp: Date.now() } });
-  }
-  window.open(urlDestino, '_blank');
+  const urlDestino = DESTINOS[destino] || DESTINOS.tramites;
+
+  // Pasar clienteId y destino en la URL de login de SUNAT para que la extensión lo lea
+  const loginBase = 'https://api-seguridad.sunat.gob.pe/v1/clientessol/';
+  const loginUrl  = `${loginBase}?gc=${encodeURIComponent(clienteId)}&dest=${encodeURIComponent(urlDestino)}&lang=es-PE&showDni=true&showLanguages=false&originalUrl=${encodeURIComponent(urlDestino)}`;
+
+  window.open(loginUrl, '_blank');
 }
 
 async function eliminarCliente(id){
