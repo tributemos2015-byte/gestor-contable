@@ -624,9 +624,10 @@ async function abrirSunat(clienteId, destino) {
     declaraciones: 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm?pestana=*&agrupacion=*&exe=55.1.1.1',
   };
   const urlDestino = URLS[destino] || URLS.tramites;
-  // Pasar clienteId y destino en el hash de sol.html (igual que funcionaba para Trámites)
-  const url = 'https://www.sunat.gob.pe/sol.html#gc=' + clienteId + '&dest=' + encodeURIComponent(urlDestino);
-  window.open(url, '_blank');
+  if (typeof chrome !== 'undefined' && chrome.storage) {
+    chrome.storage.local.set({ sunat_cliente: { clienteId, destino: urlDestino, timestamp: Date.now() } });
+  }
+  window.open(urlDestino, '_blank');
 }
 
 async function eliminarCliente(id){
