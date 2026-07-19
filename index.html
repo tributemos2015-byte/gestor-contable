@@ -733,31 +733,48 @@ async function eliminarCliente(id){
 let buzonsolTodas = [];
 let buzonsolSeleccionada = null;
 
+/**
+ * SUNAT entrega sus fechas como texto "DD/MM/YYYY HH:mm:ss" (día primero).
+ * new Date(...) de JavaScript asume MM/DD/YYYY (mes primero) y por eso
+ * arma fechas incorrectas o inválidas con ese formato. Esta función
+ * reconoce el patrón DD/MM/YYYY y lo arma a mano; para cualquier otro
+ * formato (como el ISO que usa creadoEn) deja que el navegador lo lea
+ * normalmente.
+ */
+function parsearFecha(valor){
+  if (!valor) return null;
+  if (typeof valor === 'string') {
+    const m = valor.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+    if (m) {
+      const [, dd, mm, yyyy, hh, min, ss] = m;
+      const d = new Date(
+        Number(yyyy), Number(mm) - 1, Number(dd),
+        hh ? Number(hh) : 0, min ? Number(min) : 0, ss ? Number(ss) : 0
+      );
+      return isNaN(d.getTime()) ? null : d;
+    }
+  }
+  const d = new Date(valor);
+  return isNaN(d.getTime()) ? null : d;
+}
+
 function formatearFecha(valor){
-  if (!valor) return '—';
-  try {
-    const d = new Date(valor);
-    if (isNaN(d.getTime())) return String(valor);
-    return d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  } catch { return String(valor); }
+  const d = parsearFecha(valor);
+  if (!d) return valor ? String(valor) : '—';
+  return d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
 function formatearFechaCorta(valor){
-  if (!valor) return '—';
-  try {
-    const d = new Date(valor);
-    if (isNaN(d.getTime())) return String(valor);
-    // Siempre muestra fecha completa (con año) + hora.
-    const fecha = d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
-    const hora = d.toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit' });
-    return `${fecha} · ${hora}`;
-  } catch { return String(valor); }
+  const d = parsearFecha(valor);
+  if (!d) return valor ? String(valor) : '—';
+  const fecha = d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const hora = d.toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit' });
+  return `${fecha} · ${hora}`;
 }
 
 function esReciente(valor){
-  if (!valor) return false;
-  const d = new Date(valor);
-  if (isNaN(d.getTime())) return false;
+  const d = parsearFecha(valor);
+  if (!d) return false;
   return (Date.now() - d.getTime()) < 24 * 60 * 60 * 1000;
 }
 
@@ -771,7 +788,11 @@ async function cargarNotificaciones(){
     if (!res.ok) throw new Error('Respuesta no OK');
     const data = await res.json();
     apiStatus.style.display = 'none';
-    buzonsolTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => new Date(b.fechaSunat || b.creadoEn) - new Date(a.fechaSunat || a.creadoEn));
+    buzonsolTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => {
+      const fa = parsearFecha(a.fechaSunat || a.creadoEn);
+      const fb = parsearFecha(b.fechaSunat || b.creadoEn);
+      return (fb ? fb.getTime() : 0) - (fa ? fa.getTime() : 0);
+    });
 
     // Poblar filtro de clientes
     const select = document.getElementById('buzonsol-filtro-cliente');
@@ -980,13 +1001,13 @@ function nombreMes(m){
 }
 
 function etiquetaGrupoFecha(fecha){
-  const d = new Date(fecha);
+  const d = parsearFecha(fecha) || new Date(0);
   const hoy = new Date();
   const ayer = new Date(hoy); ayer.setDate(hoy.getDate() - 1);
   if (d.toDateString() === hoy.toDateString()) return 'Hoy';
   if (d.toDateString() === ayer.toDateString()) return 'Ayer';
   const dias = Math.floor((hoy - d) / 86400000);
-  if (dias < 7) return 'Esta semana';
+  if (dias >= 0 && dias < 7) return 'Esta semana';
   if (d.getMonth() === hoy.getMonth() && d.getFullYear() === hoy.getFullYear()) return 'Este mes';
   return `${nombreMes(d.getMonth())} ${d.getFullYear()}`;
 }
@@ -1000,7 +1021,11 @@ async function cargarBuzonElectronico(){
     if (!res.ok) throw new Error('Respuesta no OK');
     const data = await res.json();
     apiStatus.style.display = 'none';
-    buzonelecTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => new Date(b.fechaSunat || b.creadoEn) - new Date(a.fechaSunat || a.creadoEn));
+    buzonelecTodas = (Array.isArray(data) ? data : []).slice().sort((a,b) => {
+      const fa = parsearFecha(a.fechaSunat || a.creadoEn);
+      const fb = parsearFecha(b.fechaSunat || b.creadoEn);
+      return (fb ? fb.getTime() : 0) - (fa ? fa.getTime() : 0);
+    });
 
     const select = document.getElementById('buzonelec-filtro-cliente');
     const clientesUnicos = [...new Set(buzonelecTodas.map(n => n.razonSocial || '').filter(Boolean))].sort();
@@ -1027,8 +1052,8 @@ function filtrarBuzonElectronico(){
     const coincideTexto = !texto || [cliente, n.ruc, n.asunto].join(' ').toLowerCase().includes(texto);
     let coincidePeriodo = true;
     if (periodoSel) {
-      const d = new Date(n.creadoEn);
-      if (!isNaN(d.getTime())) {
+      const d = parsearFecha(n.fechaSunat || n.creadoEn);
+      if (d) {
         coincidePeriodo = (ahora - d.getTime()) < (Number(periodoSel) * 86400000);
       }
     }
