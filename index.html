@@ -975,9 +975,9 @@ function seleccionarNotif(idx, el){
             ${(n.adjuntos && n.adjuntos.length) ? n.adjuntos.length + (n.adjuntos.length === 1 ? ' adjunto' : ' adjuntos') : '0 adjuntos'}
           </div>
           ${(n.adjuntos && n.adjuntos.length) ? n.adjuntos.map(a => `
-            <a href="${a.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;text-decoration:none;background:#fff;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-              <span style="flex:1;font-size:13px;font-weight:600;color:var(--ink);word-break:break-all;">${escapeHtml(a.nombre || 'archivo')}</span>
+            <a href="${a.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid ${a.esDocumentoReal ? 'var(--teal)' : 'var(--line)'};border-radius:10px;margin-bottom:8px;text-decoration:none;background:${a.esDocumentoReal ? 'var(--teal-tint)' : '#fff'};">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${a.esDocumentoReal ? 'var(--teal)' : 'var(--primary)'}" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              <span style="flex:1;font-size:13px;font-weight:600;color:var(--ink);word-break:break-all;">${a.esDocumentoReal ? '📄 Documento SUNAT — ' : '📎 Constancia — '}${escapeHtml(a.nombre || 'archivo')}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-soft)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
             </a>`).join('') : ''}
         </div>
