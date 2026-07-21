@@ -339,6 +339,24 @@
         <span>Verifica que el servidor esté corriendo (<code class="num">npm run server</code>) en <code class="num" id="api-url-shown"></code>.</span>
       </div>
 
+      <!-- Filtro por último dígito RUC -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <span style="font-size:12.5px;font-weight:600;color:var(--ink-soft);">Filtrar por último dígito RUC:</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="filtro-digito-btns">
+          <button onclick="filtrarDigito('')" class="digito-btn active" style="padding:6px 12px;border-radius:999px;border:1px solid var(--primary);background:var(--primary);color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">Todos</button>
+          <button onclick="filtrarDigito('0')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">0</button>
+          <button onclick="filtrarDigito('1')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">1</button>
+          <button onclick="filtrarDigito('2')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">2</button>
+          <button onclick="filtrarDigito('3')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">3</button>
+          <button onclick="filtrarDigito('4')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">4</button>
+          <button onclick="filtrarDigito('5')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">5</button>
+          <button onclick="filtrarDigito('6')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">6</button>
+          <button onclick="filtrarDigito('7')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">7</button>
+          <button onclick="filtrarDigito('8')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">8</button>
+          <button onclick="filtrarDigito('9')" class="digito-btn" style="padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer;">9</button>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="panel-head"><div class="panel-title">Lista de clientes</div></div>
         <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
@@ -596,6 +614,49 @@ function cerrarModalCliente(){
 }
 
 // ----- Cargar lista de clientes -----
+let _clientesTodos = [];
+let _digitoActivo = '';
+
+function filtrarDigito(digito){
+  _digitoActivo = digito;
+  // Actualizar botones
+  document.querySelectorAll('.digito-btn').forEach(b => {
+    const esActivo = b.textContent.trim() === (digito === '' ? 'Todos' : digito);
+    b.style.background = esActivo ? 'var(--primary)' : '#fff';
+    b.style.color = esActivo ? '#fff' : 'var(--ink)';
+    b.style.borderColor = esActivo ? 'var(--primary)' : 'var(--line)';
+  });
+  renderTablaClientes(_clientesTodos);
+}
+
+function renderTablaClientes(clientes){
+  const tbody = document.getElementById('clientes-tbody');
+  const filtrados = _digitoActivo === ''
+    ? clientes
+    : clientes.filter(c => (c.ruc || '').slice(-1) === _digitoActivo);
+
+  if (filtrados.length === 0){
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:20px 8px;color:var(--ink-soft);">No hay clientes con ese dígito.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtrados.map(c => `
+      <tr style="border-bottom:1px solid var(--line);">
+        <td style="padding:10px 8px;font-weight:600;">${escapeHtml(c.razonSocial || '')}</td>
+        <td style="padding:10px 8px;" class="num">${escapeHtml(c.ruc || '')}</td>
+        <td style="padding:10px 8px;">${escapeHtml(c.usuarioSol || '')}</td>
+        <td style="padding:10px 8px;" class="num">${escapeHtml(c.whatsapp || '')}</td>
+        <td style="padding:10px 8px;">
+          <span class="tag" style="background:${c.activo ? 'var(--green-tint)' : 'var(--red-tint)'};color:${c.activo ? 'var(--green)' : 'var(--red)'};">${c.activo ? 'Activo' : 'Pausado'}</span>
+        </td>
+        <td style="padding:10px 8px;text-align:right;">
+          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:6px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
+          <button onclick="eliminarCliente('${c.id}')" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--red);">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+}
+
 async function cargarClientes(){
   const tbody = document.getElementById('clientes-tbody');
   const apiStatus = document.getElementById('api-status');
@@ -611,21 +672,8 @@ async function cargarClientes(){
       return;
     }
 
-    tbody.innerHTML = clientes.map(c => `
-      <tr style="border-bottom:1px solid var(--line);">
-        <td style="padding:10px 8px;font-weight:600;">${escapeHtml(c.razonSocial || '')}</td>
-        <td style="padding:10px 8px;" class="num">${escapeHtml(c.ruc || '')}</td>
-        <td style="padding:10px 8px;">${escapeHtml(c.usuarioSol || '')}</td>
-        <td style="padding:10px 8px;" class="num">${escapeHtml(c.whatsapp || '')}</td>
-        <td style="padding:10px 8px;">
-          <span class="tag" style="background:${c.activo ? 'var(--green-tint)' : 'var(--red-tint)'};color:${c.activo ? 'var(--green)' : 'var(--red)'};">${c.activo ? 'Activo' : 'Pausado'}</span>
-        </td>
-        <td style="padding:10px 8px;text-align:right;">
-          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:6px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
-          <button onclick="eliminarCliente('${c.id}')" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--red);">Eliminar</button>
-        </td>
-      </tr>
-    `).join('');
+    _clientesTodos = clientes;
+    renderTablaClientes(clientes);
   } catch (err) {
     console.error(err);
     apiStatus.style.display = 'flex';
