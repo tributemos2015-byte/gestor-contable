@@ -144,6 +144,41 @@
   .ai-tip:last-child{border-bottom:none;}
 
   .footer-note{text-align:center;color:var(--ink-soft);font-size:12px;margin-top:30px;}
+  /* ===== CALENDARIO SUNAT FULL ===== */
+  .cal-full-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .cal-nav{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);}
+  .cal-nav-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink);}
+  .cal-nav-btn:hover{background:var(--paper);}
+  .cal-nav-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;flex:1;text-align:center;}
+  .cal-view-btns{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .cal-view-btn{padding:6px 14px;font-size:12.5px;font-weight:600;background:#fff;border:none;cursor:pointer;color:var(--ink-soft);}
+  .cal-view-btn.active{background:var(--ink);color:#fff;}
+  .cal-full-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+  .cal-full-dow{padding:10px 6px;text-align:center;font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line);background:#FAFAFA;}
+  .cal-full-day{min-height:100px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .cal-full-day:nth-child(7n){border-right:none;}
+  .cal-full-day:hover{background:var(--paper);}
+  .cal-full-day.othermonth{background:#FAFAFA;}
+  .cal-full-day.othermonth .cal-dn{color:#CCC;}
+  .cal-full-day.istoday{background:#FFF8F5;}
+  .cal-full-day.istoday .cal-dn{background:var(--primary);color:#fff;border-radius:50%;}
+  .cal-dn{font-size:12px;font-weight:700;color:var(--ink-soft);width:24px;height:24px;display:flex;align-items:center;justify-content:center;margin-bottom:3px;}
+  .cal-ev{font-size:10px;font-weight:600;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cal-ev.pdt{background:#DBEAFE;color:#1D4ED8;}
+  .cal-ev.sire{background:#D1FAE5;color:#065F46;}
+  .cal-legend-bar{display:flex;gap:14px;padding:10px 18px;border-top:1px solid var(--line);background:#FAFAFA;flex-wrap:wrap;align-items:center;}
+  .cal-leg-item{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;}
+  .cal-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+  .agenda-wrap{padding:16px;max-height:520px;overflow-y:auto;}
+  .ag-group{margin-bottom:14px;}
+  .ag-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);padding-bottom:5px;border-bottom:1px solid var(--line);margin-bottom:6px;}
+  .ag-ev{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:4px;}
+  .ag-ev.pdt{background:#EFF6FF;border:1px solid #BFDBFE;}
+  .ag-ev.sire{background:#ECFDF5;border:1px solid #A7F3D0;}
+  .ag-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .ag-dot.pdt{background:#2563EB;}.ag-dot.sire{background:#059669;}
+  .ag-text{font-size:12.5px;font-weight:600;color:var(--ink);}
+
 </style>
 </head>
 <body>
@@ -167,6 +202,7 @@
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4" width="17" height="17" rx="2"/><path d="m7.5 12 2.3 2.3L16.5 9"/></svg>Tareas</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>Control de declaraciones</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>Vencimientos SUNAT</a>
+    <a class="nav-item" href="#" id="nav-calendario" onclick="mostrarVista('calendario');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>Calendario SUNAT</a>
 
     <div class="nav-group-label">Buzones y consultas</div>
     <a class="nav-item" href="#" id="nav-buzonsol" onclick="mostrarVista('buzonsol');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>Buzón SOL</a>
@@ -412,6 +448,44 @@
       </div>
     </div>
 
+
+    <!-- ============ VISTA: CALENDARIO SUNAT ============ -->
+    <div id="view-calendario" style="display:none;">
+      <div class="hero" style="margin-bottom:20px;">
+        <div><h1>Calendario SUNAT 2026</h1><p>Vencimientos PDT 621 y SIRE según último dígito de RUC.</p></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+        <span style="font-size:12.5px;font-weight:600;color:var(--ink-soft);">Referencias:</span>
+        <span style="font-size:12.5px;font-weight:600;padding:4px 12px;background:#DBEAFE;color:#1D4ED8;border-radius:6px;">● PDT 621 (IGV-Renta)</span>
+        <span style="font-size:12.5px;font-weight:600;padding:4px 12px;background:#D1FAE5;color:#065F46;border-radius:6px;">● SIRE (Registros electrónicos)</span>
+      </div>
+      <div class="cal-full-wrap">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calCambiarMes(-1)">&#8249;</button>
+          <button class="cal-nav-btn" onclick="calCambiarMes(1)">&#8250;</button>
+          <button class="cal-nav-btn" onclick="calHoy()" style="width:auto;padding:0 10px;font-size:12px;font-weight:600;">Hoy</button>
+          <div class="cal-nav-title" id="cal-titulo"></div>
+          <div class="cal-view-btns">
+            <button class="cal-view-btn active" id="cal-btn-mes" onclick="calSetVista('mes')">Mes</button>
+            <button class="cal-view-btn" id="cal-btn-agenda" onclick="calSetVista('agenda')">Agenda</button>
+          </div>
+        </div>
+        <div id="cal-vista-mes">
+          <div class="cal-full-grid">
+            <div class="cal-full-dow">lun</div><div class="cal-full-dow">mar</div><div class="cal-full-dow">mie</div>
+            <div class="cal-full-dow">jue</div><div class="cal-full-dow">vie</div><div class="cal-full-dow">sab</div><div class="cal-full-dow">dom</div>
+          </div>
+          <div class="cal-full-grid" id="cal-cells"></div>
+        </div>
+        <div id="cal-vista-agenda" style="display:none;"><div class="agenda-wrap" id="cal-agenda-content"></div></div>
+        <div class="cal-legend-bar">
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#2563EB;"></div>PDT 621 (IGV-Renta mensual)</div>
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#059669;"></div>SIRE (Registros electronicos)</div>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--ink-soft);">Fuente: SUNAT cronograma 2026</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ============ VISTA: DASHBOARD ============ -->
     <div id="view-dashboard">
 
@@ -594,13 +668,16 @@ function mostrarVista(vista){
   document.getElementById('view-clientes').style.display = vista === 'clientes' ? 'block' : 'none';
   document.getElementById('view-buzonsol').style.display = vista === 'buzonsol' ? 'block' : 'none';
   document.getElementById('view-buzonelectronico').style.display = vista === 'buzonelectronico' ? 'block' : 'none';
+  document.getElementById('view-calendario').style.display = vista === 'calendario' ? 'block' : 'none';
   document.getElementById('nav-dashboard').classList.toggle('active', vista === 'dashboard');
   document.getElementById('nav-clientes').classList.toggle('active', vista === 'clientes');
   document.getElementById('nav-buzonsol').classList.toggle('active', vista === 'buzonsol');
   document.getElementById('nav-buzonelectronico').classList.toggle('active', vista === 'buzonelectronico');
+  document.getElementById('nav-calendario').classList.toggle('active', vista === 'calendario');
   if (vista === 'clientes') cargarClientes();
   if (vista === 'buzonsol') cargarNotificaciones();
   if (vista === 'buzonelectronico') cargarBuzonElectronico();
+  if (vista === 'calendario') calRender();
 }
 
 // ----- Modal nuevo cliente -----
@@ -1181,6 +1258,98 @@ function renderTimeline(lista){
     </div>
   `).join('');
 }
+
+// ===== CALENDARIO SUNAT 2026 =====
+const MESES_CAL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS_CAL=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+const PDT_CRON=[
+  {p:'Ene-2026',a:2026,m:1,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
+  {p:'Feb-2026',a:2026,m:2,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
+  {p:'Mar-2026',a:2026,m:3,d0:17,d1:20,d23:21,d45:22,d67:23,d89:24},
+  {p:'Abr-2026',a:2026,m:4,d0:18,d1:19,d23:20,d45:21,d67:22,d89:25},
+  {p:'May-2026',a:2026,m:5,d0:15,d1:16,d23:17,d45:18,d67:19,d89:22},
+  {p:'Jun-2026',a:2026,m:6,d0:15,d1:16,d23:17,d45:20,d67:21,d89:22},
+  {p:'Jul-2026',a:2026,m:7,d0:18,d1:19,d23:20,d45:21,d67:24,d89:25},
+  {p:'Ago-2026',a:2026,m:8,d0:15,d1:16,d23:17,d45:18,d67:21,d89:22},
+  {p:'Set-2026',a:2026,m:9,d0:16,d1:19,d23:20,d45:21,d67:22,d89:23},
+  {p:'Oct-2026',a:2026,m:10,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
+  {p:'Nov-2026',a:2026,m:11,d0:17,d1:18,d23:21,d45:22,d67:23,d89:24},
+  {p:'Dic-2026',a:2027,m:0,d0:18,d1:19,d23:20,d45:21,d67:22,d89:25},
+];
+const SIRE_CRON=[
+  {p:'Ene-2026',a:2026,m:1,d0:13,d1:16,d23:17,d45:18,d67:19,d89:20},
+  {p:'Feb-2026',a:2026,m:2,d0:13,d1:16,d23:17,d45:18,d67:19,d89:20},
+  {p:'Mar-2026',a:2026,m:3,d0:16,d1:17,d23:20,d45:21,d67:22,d89:23},
+  {p:'Abr-2026',a:2026,m:4,d0:15,d1:18,d23:19,d45:20,d67:21,d89:22},
+  {p:'May-2026',a:2026,m:5,d0:12,d1:15,d23:16,d45:17,d67:18,d89:19},
+  {p:'Jun-2026',a:2026,m:6,d0:14,d1:15,d23:16,d45:17,d67:20,d89:21},
+  {p:'Jul-2026',a:2026,m:7,d0:17,d1:18,d23:19,d45:20,d67:21,d89:24},
+  {p:'Ago-2026',a:2026,m:8,d0:14,d1:15,d23:16,d45:17,d67:18,d89:21},
+  {p:'Set-2026',a:2026,m:9,d0:15,d1:16,d23:19,d45:20,d67:21,d89:22},
+  {p:'Oct-2026',a:2026,m:10,d0:13,d1:16,d23:17,d45:18,d67:19,d89:20},
+  {p:'Nov-2026',a:2026,m:11,d0:16,d1:17,d23:18,d45:21,d67:22,d89:23},
+  {p:'Dic-2026',a:2027,m:0,d0:15,d1:18,d23:19,d45:20,d67:21,d89:22},
+];
+const GS_CAL=[{k:'d0',l:'0'},{k:'d1',l:'1'},{k:'d23',l:'2,3'},{k:'d45',l:'4,5'},{k:'d67',l:'6,7'},{k:'d89',l:'8,9'}];
+function buildCalEvs(){
+  const evs=[];
+  PDT_CRON.forEach(r=>GS_CAL.forEach(g=>{if(r[g.k])evs.push({f:new Date(r.a,r.m,r[g.k]),t:'pdt',tx:'PDT 621 ('+r.p+') - RUC ...'+g.l,per:r.p});}));
+  SIRE_CRON.forEach(r=>GS_CAL.forEach(g=>{if(r[g.k])evs.push({f:new Date(r.a,r.m,r[g.k]),t:'sire',tx:'SIRE ('+r.p+') - RUC ...'+g.l,per:r.p});}));
+  return evs;
+}
+const CAL_EVS=buildCalEvs();
+let calAnio=new Date().getFullYear(),calMes=new Date().getMonth(),calVista='mes';
+function calGetD(a,m,d){return CAL_EVS.filter(e=>e.f.getFullYear()===a&&e.f.getMonth()===m&&e.f.getDate()===d);}
+function calRender(){
+  document.getElementById('cal-titulo').textContent=MESES_CAL[calMes].charAt(0).toUpperCase()+MESES_CAL[calMes].slice(1)+' de '+calAnio;
+  if(calVista==='mes'){document.getElementById('cal-vista-mes').style.display='';document.getElementById('cal-vista-agenda').style.display='none';calRenderMes();}
+  else{document.getElementById('cal-vista-mes').style.display='none';document.getElementById('cal-vista-agenda').style.display='';calRenderAgenda();}
+}
+function calRenderMes(){
+  const hoy=new Date();
+  const primer=new Date(calAnio,calMes,1);
+  let dow=primer.getDay();dow=dow===0?6:dow-1;
+  const dim=new Date(calAnio,calMes+1,0).getDate();
+  const dma=new Date(calAnio,calMes,0).getDate();
+  const total=Math.ceil((dow+dim)/7)*7;
+  let html='';
+  for(let i=0;i<total;i++){
+    let d,m2,a2,other=false;
+    if(i<dow){d=dma-dow+i+1;m2=calMes-1;a2=calMes===0?calAnio-1:calAnio;if(m2<0)m2=11;other=true;}
+    else if(i>=dow+dim){d=i-dow-dim+1;m2=calMes+1;a2=calMes===11?calAnio+1:calAnio;if(m2>11)m2=0;other=true;}
+    else{d=i-dow+1;m2=calMes;a2=calAnio;}
+    const esHoy=!other&&d===hoy.getDate()&&calMes===hoy.getMonth()&&calAnio===hoy.getFullYear();
+    const evs=other?[]:calGetD(a2,m2,d);
+    const pdts=evs.filter(e=>e.t==='pdt');
+    const sires=evs.filter(e=>e.t==='sire');
+    html+='<div class="cal-full-day'+(other?' othermonth':'')+(esHoy?' istoday':'')+'"><div class="cal-dn">'+d+'</div>';
+    if(pdts.length)html+='<div class="cal-ev pdt" title="'+pdts.map(e=>e.tx).join('
+')+'">Venc. PDT 621 ('+pdts[0].per.split('-')[0]+') - R...</div>';
+    if(sires.length)html+='<div class="cal-ev sire" title="'+sires.map(e=>e.tx).join('
+')+'">Venc. SIRE ('+sires[0].per.split('-')[0]+') - R...</div>';
+    html+='</div>';
+  }
+  document.getElementById('cal-cells').innerHTML=html;
+}
+function calRenderAgenda(){
+  const hoy=new Date();
+  const evsMes=CAL_EVS.filter(e=>e.f.getFullYear()===calAnio&&e.f.getMonth()===calMes).sort((a,b)=>a.f-b.f);
+  if(!evsMes.length){document.getElementById('cal-agenda-content').innerHTML='<div style="color:var(--ink-soft);font-size:14px;padding:20px 0;">Sin vencimientos este mes.</div>';return;}
+  const pd={};evsMes.forEach(e=>{const k=e.f.getDate();if(!pd[k])pd[k]=[];pd[k].push(e);});
+  document.getElementById('cal-agenda-content').innerHTML=Object.keys(pd).sort((a,b)=>a-b).map(d=>{
+    const f=new Date(calAnio,calMes,d);const esH=f.toDateString()===hoy.toDateString();
+    return '<div class="ag-group"><div class="ag-head"'+(esH?' style="color:var(--primary);"':'')+'>'+DIAS_CAL[f.getDay()]+', '+d+' de '+MESES_CAL[calMes]+' '+calAnio+(esH?' - Hoy':'')+' </div>'+pd[d].map(e=>'<div class="ag-ev '+e.t+'"><div class="ag-dot '+e.t+'"></div><div class="ag-text">'+e.tx+'</div></div>').join('')+'</div>';
+  }).join('');
+}
+function calCambiarMes(d){calMes+=d;if(calMes>11){calMes=0;calAnio++;}if(calMes<0){calMes=11;calAnio--;}calRender();}
+function calHoy(){const h=new Date();calAnio=h.getFullYear();calMes=h.getMonth();calRender();}
+function calSetVista(v){
+  calVista=v;
+  document.getElementById('cal-btn-mes').classList.toggle('active',v==='mes');
+  document.getElementById('cal-btn-agenda').classList.toggle('active',v==='agenda');
+  calRender();
+}
+
 </script>
 </body>
 </html>
