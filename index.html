@@ -901,7 +901,7 @@ function formatearFechaCorta(valor){
   if (!d) return valor ? String(valor) : '—';
   const fecha = d.toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' });
   const hora = d.toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit' });
-  return `${fecha} · ${hora}`;
+  return fecha + ' \u00b7 ' + hora;
 }
 
 function esReciente(valor){
@@ -1206,7 +1206,7 @@ function filtrarBuzonElectronico(){
 function renderTimeline(lista){
   const el = document.getElementById('buzonelec-timeline');
   const contador = document.getElementById('buzonelec-contador');
-  contador.textContent = `${lista.length} comunicación${lista.length !== 1 ? 'es' : ''}`;
+  contador.textContent = lista.length + ' comunicaci\u00f3n' + (lista.length !== 1 ? 'es' : '');
 
   if (lista.length === 0){
     el.innerHTML = '<div style="padding:24px 16px;color:var(--ink-soft);font-size:13.5px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);">No hay comunicaciones que coincidan con el filtro.</div>';
@@ -1323,10 +1323,8 @@ function calRenderMes(){
     const pdts=evs.filter(e=>e.t==='pdt');
     const sires=evs.filter(e=>e.t==='sire');
     html+='<div class="cal-full-day'+(other?' othermonth':'')+(esHoy?' istoday':'')+'"><div class="cal-dn">'+d+'</div>';
-    if(pdts.length)html+='<div class="cal-ev pdt" title="'+pdts.map(e=>e.tx).join('
-')+'">Venc. PDT 621 ('+pdts[0].per.split('-')[0]+') - R...</div>';
-    if(sires.length)html+='<div class="cal-ev sire" title="'+sires.map(e=>e.tx).join('
-')+'">Venc. SIRE ('+sires[0].per.split('-')[0]+') - R...</div>';
+    if(pdts.length)html+='<div class="cal-ev pdt" title="'+pdts.map(e=>e.tx).join('\n')+'">Venc. PDT 621 ('+pdts[0].per.split('-')[0]+') - R...</div>';
+    if(sires.length)html+='<div class="cal-ev sire" title="'+sires.map(e=>e.tx).join('\n')+'">Venc. SIRE ('+sires[0].per.split('-')[0]+') - R...</div>';
     html+='</div>';
   }
   document.getElementById('cal-cells').innerHTML=html;
