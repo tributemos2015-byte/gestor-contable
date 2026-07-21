@@ -672,6 +672,13 @@ async function cargarClientes(){
       return;
     }
 
+    // Ordenar por último dígito RUC de menor a mayor
+    clientes.sort((a, b) => {
+      const da = (a.ruc || '').slice(-1);
+      const db = (b.ruc || '').slice(-1);
+      return da.localeCompare(db);
+    });
+
     _clientesTodos = clientes;
     renderTablaClientes(clientes);
   } catch (err) {
