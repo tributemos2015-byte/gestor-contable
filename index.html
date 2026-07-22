@@ -835,15 +835,18 @@ async function abrirSunat(clienteId, destino) {
   var btnEl = event && event.target ? event.target : null;
   var textoOriginal = btnEl ? btnEl.textContent : '';
   if (btnEl) { btnEl.textContent = 'Cargando...'; btnEl.disabled = true; }
+
+  // Abrir SUNAT PRIMERO (antes del fetch async) para evitar bloqueo de popup
+  var urlSunat = destino === 'declaraciones'
+    ? 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm'
+    : 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm';
+  var ventana = window.open(urlSunat, '_blank');
+
   try {
     var res = await fetch(API_URL + '/clientes/' + clienteId + '/credenciales');
     if (!res.ok) throw new Error('No se pudieron obtener las credenciales');
     var creds = await res.json();
     if (creds.error) throw new Error(creds.error);
-    var urlSunat = destino === 'declaraciones'
-      ? 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm'
-      : 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm';
-
     // Guardar datos en variables para los botones de copiar
     window._solRuc = creds.ruc;
     window._solUsr = creds.usuarioSol;
