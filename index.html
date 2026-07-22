@@ -831,45 +831,17 @@ async function toggleActivo(id, nuevoEstado){
 
 // ----- Eliminar cliente -----
 // Detectar si la extensión está activa (se setea al cargar la página)
-async function abrirSunat(clienteId, destino) {
-  const btnEl = event && event.target ? event.target : null;
-  const textoOriginal = btnEl ? btnEl.textContent : '';
-  if (btnEl) { btnEl.textContent = 'Abriendo...'; btnEl.disabled = true; }
-  try {
-    const res = await fetch(API_URL + '/clientes/' + clienteId + '/credenciales');
-    if (!res.ok) throw new Error('No se pudieron obtener las credenciales');
-    const creds = await res.json();
-    if (creds.error) throw new Error(creds.error);
-
-    const urlPost = 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm';
-    const urlDestino = destino === 'declaraciones'
-      ? 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm'
-      : urlPost;
-
-    const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Iniciando SUNAT...</title>'
-      + '<style>body{font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;'
-      + 'min-height:100vh;margin:0;background:#f5f5f5;flex-direction:column;gap:16px;}'
-      + '.sp{width:40px;height:40px;border:4px solid #eee;border-top-color:#C4501C;border-radius:50%;'
-      + 'animation:spin .8s linear infinite;}@keyframes spin{to{transform:rotate(360deg);}}'
-      + 'p{color:#555;font-size:14px;}</style></head>'
-      + '<body><div class="sp"></div><p>Iniciando sesion en SUNAT...</p>'
-      + '<form id="f" method="POST" action="' + urlPost + '">'
-      + '<input type="hidden" name="txtRuc" value="' + creds.ruc + '">'
-      + '<input type="hidden" name="txtUsuario" value="' + creds.usuarioSol + '">'
-      + '<input type="hidden" name="txtContrasena" value="' + creds.claveSol + '">'
-      + '<input type="hidden" name="btnAceptar" value="Iniciar Sesion">'
-      + '</form><script>setTimeout(function(){document.getElementById("f").submit();},600);<\/script>'
-      + '</body></html>';
-
-    const w = window.open('', '_blank');
-    if (w) { w.document.write(html); w.document.close(); }
-    else { alert('Permite ventanas emergentes para este sitio.'); }
-  } catch(err) {
-    console.error('Error SUNAT:', err);
-    alert('Error: ' + err.message);
-  } finally {
-    if (btnEl) { btnEl.textContent = textoOriginal; btnEl.disabled = false; }
-  }
+function abrirSunat(clienteId, destino) {
+  // Crear un <a> temporal y hacer click — nunca bloqueado por el navegador
+  // porque es un click directo del usuario, no window.open() desde JS async
+  const url = API_URL + '/clientes/' + clienteId + '/login-sunat?destino=' + destino;
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 async function eliminarCliente(id){
