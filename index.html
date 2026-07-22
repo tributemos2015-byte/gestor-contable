@@ -479,6 +479,8 @@
           </div>
           <div class="cal-full-grid" id="cal-cells"></div>
         </div>
+        <div id="cal-vista-semana" style="display:none;"><div id="cal-semana-content" style="padding:16px;overflow-x:auto;"></div></div>
+        <div id="cal-vista-dia" style="display:none;"><div id="cal-dia-content" style="padding:20px;"></div></div>
         <div id="cal-vista-agenda" style="display:none;"><div class="agenda-wrap" id="cal-agenda-content"></div></div>
         <div class="cal-legend-bar">
           <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#2563EB;"></div>PDT 621 (IGV-Renta mensual)</div>
@@ -1319,10 +1321,18 @@ function buildCalEvs(){
 const CAL_EVS=buildCalEvs();
 let calAnio=new Date().getFullYear(),calMes=new Date().getMonth(),calVista='mes';
 function calGetD(a,m,d){return CAL_EVS.filter(e=>e.f.getFullYear()===a&&e.f.getMonth()===m&&e.f.getDate()===d);}
+var calDiaSelec=new Date().getDate();
 function calRender(){
   document.getElementById('cal-titulo').textContent=MESES_CAL[calMes].charAt(0).toUpperCase()+MESES_CAL[calMes].slice(1)+' de '+calAnio;
-  if(calVista==='mes'){document.getElementById('cal-vista-mes').style.display='';document.getElementById('cal-vista-agenda').style.display='none';calRenderMes();}
-  else{document.getElementById('cal-vista-mes').style.display='none';document.getElementById('cal-vista-agenda').style.display='';calRenderAgenda();}
+  var vistas=['mes','semana','dia','agenda'];
+  vistas.forEach(function(v){
+    var el=document.getElementById('cal-vista-'+v);
+    if(el)el.style.display=(v===calVista)?'':'none';
+  });
+  if(calVista==='mes')calRenderMes();
+  else if(calVista==='semana')calRenderSemana();
+  else if(calVista==='dia')calRenderDia();
+  else calRenderAgenda();
 }
 function calRenderMes(){
   const hoy=new Date();
@@ -1358,52 +1368,14 @@ function calRenderAgenda(){
     return '<div class="ag-group"><div class="ag-head"'+(esH?' style="color:var(--primary);"':'')+'>'+DIAS_CAL[f.getDay()]+', '+d+' de '+MESES_CAL[calMes]+' '+calAnio+(esH?' - Hoy':'')+' </div>'+pd[d].map(e=>'<div class="ag-ev '+e.t+'"><div class="ag-dot '+e.t+'"></div><div class="ag-text">'+e.tx+'</div></div>').join('')+'</div>';
   }).join('');
 }
-function calRenderSemana(){
-  var hoy=new Date();
-  var primerDia=new Date(calAnio,calMes,1);
-  var dowP=primerDia.getDay();dowP=dowP===0?6:dowP-1;
-  var semanaBase=new Date(calAnio,calMes,1-dowP);
-  var html='<table style="width:100%;border-collapse:collapse;min-width:600px;">';
-  html+='<thead><tr><th style="width:50px;padding:8px;border-bottom:1px solid #e5e7eb;"></th>';
-  var dias=['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
-  var fechaSem=new Date(semanaBase);
-  for(var i=0;i<7;i++){
-    var esH=fechaSem.toDateString()===hoy.toDateString();
-    html+='<th style="padding:8px 4px;border-bottom:1px solid #e5e7eb;text-align:center;font-size:12px;color:'+(esH?'#2563EB':'#6b7280')+';font-weight:600;">'+dias[i]+' <span style="font-size:16px;font-weight:700;color:'+(esH?'#2563EB':'#111827')+';">'+fechaSem.getDate()+'</span></th>';
-    fechaSem.setDate(fechaSem.getDate()+1);
-  }
-  html+='</tr></thead><tbody>';
-  for(var h=8;h<=20;h++){
-    html+='<tr><td style="padding:4px 8px;border-bottom:1px solid #f3f4f6;font-size:11px;color:#9ca3af;white-space:nowrap;">'+(h<10?'0':'')+h+':00</td>';
-    var fd=new Date(semanaBase);
-    for(var dd=0;dd<7;dd++){
-      var evsDia=calGetD(fd.getFullYear(),fd.getMonth(),fd.getDate());
-      html+='<td style="padding:2px;border-bottom:1px solid #f3f4f6;border-left:1px solid #f3f4f6;min-height:36px;vertical-align:top;">';
-      if(h===9&&evsDia.length>0){evsDia.forEach(function(ev){html+='<div class="cal-ev '+ev.t+'" style="font-size:10px;margin-bottom:2px;">'+ev.tx.substring(0,18)+'...</div>';});}
-      html+='</td>';
-      fd.setDate(fd.getDate()+1);
-    }
-    html+='</tr>';
-  }
-  html+='</tbody></table>';
-  document.getElementById('cal-semana-content').innerHTML=html;
-}
-function calRenderDia(){
-  var hoy=new Date();
-  var fecha=new Date(calAnio,calMes,calDiaSelec);
-  var esH=fecha.toDateString()===hoy.toDateString();
-  var evsDia=calGetD(calAnio,calMes,calDiaSelec);
-  var html='<h3 style="font-size:16px;font-weight:600;color:#111827;margin:0 0 16px;">'+DIAS_CAL[fecha.getDay()]+', '+calDiaSelec+' de '+MESES_CAL[calMes]+' '+calAnio+(esH?' <span style="font-size:12px;color:#f59e0b;">Hoy</span>':'')+'</h3>';
-  if(!evsDia.length){html+='<div style="color:#9ca3af;font-size:14px;">Sin vencimientos este dia.</div>';}
-  else{evsDia.forEach(function(ev){html+='<div class="ag-ev '+ev.t+'" style="margin-bottom:8px;"><div class="ag-dot '+ev.t+'"></div><div class="ag-text '+ev.t+'">'+ev.tx+'<br><span style="font-size:11px;color:#6b7280;">RUC terminado en '+ev.dig+'</span></div></div>';});}
-  document.getElementById('cal-dia-content').innerHTML=html;
-}
 function calCambiarMes(d){calMes+=d;if(calMes>11){calMes=0;calAnio++;}if(calMes<0){calMes=11;calAnio--;}calRender();}
-function calHoy(){const h=new Date();calAnio=h.getFullYear();calMes=h.getMonth();calRender();}
+function calHoy(){var h=new Date();calAnio=h.getFullYear();calMes=h.getMonth();calDiaSelec=h.getDate();calRender();}
 function calSetVista(v){
   calVista=v;
-  document.getElementById('cal-btn-mes').classList.toggle('active',v==='mes');
-  document.getElementById('cal-btn-agenda').classList.toggle('active',v==='agenda');
+  ['mes','semana','dia','agenda'].forEach(function(n){
+    var btn=document.getElementById('cal-btn-'+n);
+    if(btn)btn.classList.toggle('active',n===v);
+  });
   calRender();
 }
 
