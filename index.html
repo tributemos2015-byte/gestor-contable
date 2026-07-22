@@ -832,66 +832,8 @@ async function toggleActivo(id, nuevoEstado){
 // ----- Eliminar cliente -----
 // Detectar si la extensión está activa (se setea al cargar la página)
 async function abrirSunat(clienteId, destino) {
-  var btnEl = event && event.target ? event.target : null;
-  var textoOriginal = btnEl ? btnEl.textContent : '';
-  if (btnEl) { btnEl.textContent = 'Cargando...'; btnEl.disabled = true; }
-
-  // Abrir SUNAT PRIMERO (antes del fetch async) para evitar bloqueo de popup
-  var urlSunat = destino === 'declaraciones'
-    ? 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm'
-    : 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm';
-  var ventana = window.open(urlSunat, '_blank');
-
-  try {
-    var res = await fetch(API_URL + '/clientes/' + clienteId + '/credenciales');
-    if (!res.ok) throw new Error('No se pudieron obtener las credenciales');
-    var creds = await res.json();
-    if (creds.error) throw new Error(creds.error);
-    // Guardar datos en variables para los botones de copiar
-    window._solRuc = creds.ruc;
-    window._solUsr = creds.usuarioSol;
-    window._solClave = creds.claveSol;
-    window._solUrl = urlSunat;
-
-    var modal = document.createElement('div');
-    modal.id = 'modal-sol-creds';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    var inner = document.createElement('div');
-    inner.style.cssText = 'background:#fff;border-radius:16px;padding:26px;width:400px;max-width:94vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
-    inner.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">'
-      + '<b style="font-size:16px;color:#241C15;">Credenciales SOL</b>'
-      + '<span onclick="document.getElementById(\'modal-sol-creds\').remove()" style="cursor:pointer;font-size:24px;color:#999;line-height:1;">&times;</span></div>'
-      + '<div style="background:#F0F7FF;border:1px solid #BFDBFE;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #DBEAFE;">'
-      + '<span style="font-size:13px;color:#6b7280;font-weight:600;">RUC</span>'
-      + '<div style="display:flex;align-items:center;gap:10px;">'
-      + '<b style="font-family:monospace;font-size:13px;">' + escapeHtml(creds.ruc) + '</b>'
-      + '<button onclick="navigator.clipboard.writeText(window._solRuc);this.textContent=\'Copiado \u2713\';this.style.color=\'#059669\';setTimeout(()=>{this.textContent=\'Copiar\';this.style.color=\'\'},1500)" style="font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid #CBD5E1;background:#fff;cursor:pointer;">Copiar</button>'
-      + '</div></div>'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #DBEAFE;">'
-      + '<span style="font-size:13px;color:#6b7280;font-weight:600;">Usuario SOL</span>'
-      + '<div style="display:flex;align-items:center;gap:10px;">'
-      + '<b style="font-family:monospace;font-size:13px;">' + escapeHtml(creds.usuarioSol) + '</b>'
-      + '<button onclick="navigator.clipboard.writeText(window._solUsr);this.textContent=\'Copiado \u2713\';this.style.color=\'#059669\';setTimeout(()=>{this.textContent=\'Copiar\';this.style.color=\'\'},1500)" style="font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid #CBD5E1;background:#fff;cursor:pointer;">Copiar</button>'
-      + '</div></div>'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">'
-      + '<span style="font-size:13px;color:#6b7280;font-weight:600;">Clave SOL</span>'
-      + '<div style="display:flex;align-items:center;gap:10px;">'
-      + '<b style="font-family:monospace;font-size:13px;">' + escapeHtml(creds.claveSol) + '</b>'
-      + '<button onclick="navigator.clipboard.writeText(window._solClave);this.textContent=\'Copiado \u2713\';this.style.color=\'#059669\';setTimeout(()=>{this.textContent=\'Copiar\';this.style.color=\'\'},1500)" style="font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid #CBD5E1;background:#fff;cursor:pointer;">Copiar</button>'
-      + '</div></div></div>'
-      + '<div style="font-size:12px;color:#92400E;background:#FEF3C7;border-radius:6px;padding:8px 12px;margin-bottom:14px;">'
-      + '\u26a0 En SUNAT borra primero el usuario guardado por el navegador, luego pega los datos.</div>'
-      + '<a href="' + urlSunat + '" target="_blank" rel="noopener" onclick="setTimeout(function(){document.getElementById(\'modal-sol-creds\').remove();},600)" '
-      + 'style="display:block;text-align:center;background:#C4501C;color:#fff;padding:12px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">Abrir SUNAT \u2192</a>';
-    modal.appendChild(inner);
-    document.body.appendChild(modal);
-    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
-  } catch(err) {
-    alert('Error: ' + err.message);
-  } finally {
-    if (btnEl) { btnEl.textContent = textoOriginal; btnEl.disabled = false; }
-  }
+  // Visor streaming — login automático sin instalar nada
+  window.open(API_URL + '/sunat/' + clienteId + '/ver', '_blank');
 }
 
 async function eliminarCliente(id){
