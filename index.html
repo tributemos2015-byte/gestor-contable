@@ -144,40 +144,49 @@
   .ai-tip:last-child{border-bottom:none;}
 
   .footer-note{text-align:center;color:var(--ink-soft);font-size:12px;margin-top:30px;}
-  /* ===== CALENDARIO SUNAT FULL ===== */
-  .cal-full-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
-  .cal-nav{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);}
-  .cal-nav-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink);}
-  .cal-nav-btn:hover{background:var(--paper);}
-  .cal-nav-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;flex:1;text-align:center;}
-  .cal-view-btns{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
-  .cal-view-btn{padding:6px 14px;font-size:12.5px;font-weight:600;background:#fff;border:none;cursor:pointer;color:var(--ink-soft);}
-  .cal-view-btn.active{background:var(--ink);color:#fff;}
+  /* ===== CALENDARIO SUNAT FULL — estilo PacaContable ===== */
+  .cal-full-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .cal-nav{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#fff;}
+  .cal-nav-btn{width:32px;height:32px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:#374151;font-weight:300;}
+  .cal-nav-btn:hover{background:#f9fafb;}
+  .cal-nav-title{font-size:20px;font-weight:600;flex:1;text-align:center;color:#111827;}
+  .cal-view-btns{display:flex;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;}
+  .cal-view-btn{padding:5px 14px;font-size:12.5px;font-weight:600;background:#fff;border:none;border-right:1px solid #e5e7eb;cursor:pointer;color:#6b7280;}
+  .cal-view-btn:last-child{border-right:none;}
+  .cal-view-btn.active{background:#111827;color:#fff;}
   .cal-full-grid{display:grid;grid-template-columns:repeat(7,1fr);}
-  .cal-full-dow{padding:10px 6px;text-align:center;font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line);background:#FAFAFA;}
-  .cal-full-day{min-height:100px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .cal-full-dow{padding:10px 0;text-align:center;font-size:12px;font-weight:600;color:#2563EB;border-bottom:1px solid #e5e7eb;background:#fff;cursor:pointer;}
+  .cal-full-dow:hover{text-decoration:underline;}
+  .cal-full-day{min-height:110px;padding:6px 4px;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;background:#fff;vertical-align:top;}
   .cal-full-day:nth-child(7n){border-right:none;}
-  .cal-full-day:hover{background:var(--paper);}
-  .cal-full-day.othermonth{background:#FAFAFA;}
-  .cal-full-day.othermonth .cal-dn{color:#CCC;}
-  .cal-full-day.istoday{background:#FFF8F5;}
-  .cal-full-day.istoday .cal-dn{background:var(--primary);color:#fff;border-radius:50%;}
-  .cal-dn{font-size:12px;font-weight:700;color:var(--ink-soft);width:24px;height:24px;display:flex;align-items:center;justify-content:center;margin-bottom:3px;}
-  .cal-ev{font-size:10px;font-weight:600;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .cal-ev.pdt{background:#DBEAFE;color:#1D4ED8;}
-  .cal-ev.sire{background:#D1FAE5;color:#065F46;}
-  .cal-legend-bar{display:flex;gap:14px;padding:10px 18px;border-top:1px solid var(--line);background:#FAFAFA;flex-wrap:wrap;align-items:center;}
-  .cal-leg-item{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;}
-  .cal-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
-  .agenda-wrap{padding:16px;max-height:520px;overflow-y:auto;}
-  .ag-group{margin-bottom:14px;}
-  .ag-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);padding-bottom:5px;border-bottom:1px solid var(--line);margin-bottom:6px;}
-  .ag-ev{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:4px;}
+  .cal-full-day.othermonth{background:#f9fafb;}
+  .cal-full-day.othermonth .cal-dn{color:#d1d5db;}
+  .cal-full-day.istoday{background:#fffbeb;}
+  .cal-dn{font-size:13px;font-weight:500;color:#2563EB;width:28px;height:28px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;border-radius:50%;cursor:pointer;}
+  .cal-dn:hover{background:#EFF6FF;}
+  .cal-full-day.istoday .cal-dn{background:#f59e0b;color:#fff;}
+  .cal-full-day.othermonth .cal-dn{color:#d1d5db;}
+  .cal-full-day.othermonth .cal-dn:hover{background:#f3f4f6;}
+  .cal-ev{font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+  .cal-ev.pdt{background:#2563EB;color:#fff;}
+  .cal-ev.sire{background:#059669;color:#fff;}
+  .cal-ev:hover{opacity:.85;}
+  .cal-legend-bar{display:flex;gap:16px;padding:10px 16px;border-top:1px solid #e5e7eb;background:#f9fafb;flex-wrap:wrap;align-items:center;}
+  .cal-leg-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#374151;}
+  .cal-leg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+  /* Agenda */
+  .agenda-wrap{padding:16px;max-height:560px;overflow-y:auto;}
+  .ag-group{margin-bottom:16px;}
+  .ag-head{font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;padding-bottom:6px;border-bottom:1px solid #e5e7eb;margin-bottom:8px;}
+  .ag-ev{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:4px;cursor:pointer;}
   .ag-ev.pdt{background:#EFF6FF;border:1px solid #BFDBFE;}
+  .ag-ev.pdt:hover{background:#DBEAFE;}
   .ag-ev.sire{background:#ECFDF5;border:1px solid #A7F3D0;}
-  .ag-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .ag-ev.sire:hover{background:#D1FAE5;}
+  .ag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .ag-dot.pdt{background:#2563EB;}.ag-dot.sire{background:#059669;}
-  .ag-text{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .ag-text{font-size:13px;font-weight:600;}
+  .ag-text.pdt{color:#1D4ED8;}.ag-text.sire{color:#065F46;}
 
 </style>
 </head>
@@ -451,42 +460,58 @@
 
     <!-- ============ VISTA: CALENDARIO SUNAT ============ -->
     <div id="view-calendario" style="display:none;">
-      <div class="hero" style="margin-bottom:20px;">
-        <div><h1>Calendario SUNAT 2026</h1><p>Vencimientos PDT 621 y SIRE según último dígito de RUC.</p></div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
-        <span style="font-size:12.5px;font-weight:600;color:var(--ink-soft);">Referencias:</span>
-        <span style="font-size:12.5px;font-weight:600;padding:4px 12px;background:#DBEAFE;color:#1D4ED8;border-radius:6px;">● PDT 621 (IGV-Renta)</span>
-        <span style="font-size:12.5px;font-weight:600;padding:4px 12px;background:#D1FAE5;color:#065F46;border-radius:6px;">● SIRE (Registros electrónicos)</span>
+      <div class="hero" style="margin-bottom:16px;">
+        <div><h1>Calendario SUNAT 2026</h1><p>Vencimientos PDT 621 y SIRE por último dígito de RUC.</p></div>
       </div>
       <div class="cal-full-wrap">
+        <!-- Navegación -->
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="calCambiarMes(-1)">&#8249;</button>
           <button class="cal-nav-btn" onclick="calCambiarMes(1)">&#8250;</button>
-          <button class="cal-nav-btn" onclick="calHoy()" style="width:auto;padding:0 10px;font-size:12px;font-weight:600;">Hoy</button>
+          <button class="cal-nav-btn" onclick="calHoy()" style="width:auto;padding:0 12px;font-size:13px;font-weight:600;">Hoy</button>
           <div class="cal-nav-title" id="cal-titulo"></div>
           <div class="cal-view-btns">
             <button class="cal-view-btn active" id="cal-btn-mes" onclick="calSetVista('mes')">Mes</button>
+            <button class="cal-view-btn" id="cal-btn-semana" onclick="calSetVista('semana')">Semana</button>
+            <button class="cal-view-btn" id="cal-btn-dia" onclick="calSetVista('dia')">Día</button>
             <button class="cal-view-btn" id="cal-btn-agenda" onclick="calSetVista('agenda')">Agenda</button>
           </div>
         </div>
+        <!-- Vista mes -->
         <div id="cal-vista-mes">
           <div class="cal-full-grid">
-            <div class="cal-full-dow">lun</div><div class="cal-full-dow">mar</div><div class="cal-full-dow">mie</div>
-            <div class="cal-full-dow">jue</div><div class="cal-full-dow">vie</div><div class="cal-full-dow">sab</div><div class="cal-full-dow">dom</div>
+            <div class="cal-full-dow">lun</div>
+            <div class="cal-full-dow">mar</div>
+            <div class="cal-full-dow">mié</div>
+            <div class="cal-full-dow">jue</div>
+            <div class="cal-full-dow">vie</div>
+            <div class="cal-full-dow">sáb</div>
+            <div class="cal-full-dow">dom</div>
           </div>
           <div class="cal-full-grid" id="cal-cells"></div>
         </div>
-        <div id="cal-vista-agenda" style="display:none;"><div class="agenda-wrap" id="cal-agenda-content"></div></div>
+        <!-- Vista semana -->
+        <div id="cal-vista-semana" style="display:none;">
+          <div id="cal-semana-content" style="padding:20px;"></div>
+        </div>
+        <!-- Vista día -->
+        <div id="cal-vista-dia" style="display:none;">
+          <div id="cal-dia-content" style="padding:20px;"></div>
+        </div>
+        <!-- Vista agenda -->
+        <div id="cal-vista-agenda" style="display:none;">
+          <div class="agenda-wrap" id="cal-agenda-content"></div>
+        </div>
+        <!-- Leyenda -->
         <div class="cal-legend-bar">
-          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#2563EB;"></div>PDT 621 (IGV-Renta mensual)</div>
-          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#059669;"></div>SIRE (Registros electronicos)</div>
-          <span style="margin-left:auto;font-size:10.5px;color:var(--ink-soft);">Fuente: SUNAT cronograma 2026</span>
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#2563EB;"></div>PDT 621 — IGV Renta mensual</div>
+          <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#059669;"></div>SIRE — Registros electrónicos</div>
+          <span style="margin-left:auto;font-size:11px;color:#9ca3af;">Cronograma SUNAT 2026 · Actualizado automáticamente</span>
         </div>
       </div>
     </div>
 
-    <!-- ============ VISTA: DASHBOARD ============ -->
+        <!-- ============ VISTA: DASHBOARD ============ -->
     <div id="view-dashboard">
 
     <!-- Quick access -->
@@ -1276,9 +1301,10 @@ function renderTimeline(lista){
   `).join('');
 }
 
-// ===== CALENDARIO SUNAT 2026 =====
+// ===== CALENDARIO SUNAT 2026 — estilo PacaContable =====
 const MESES_CAL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DIAS_CAL=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+
 const PDT_CRON=[
   {p:'Ene-2026',a:2026,m:1,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
   {p:'Feb-2026',a:2026,m:2,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
@@ -1307,61 +1333,153 @@ const SIRE_CRON=[
   {p:'Nov-2026',a:2026,m:11,d0:16,d1:17,d23:18,d45:21,d67:22,d89:23},
   {p:'Dic-2026',a:2027,m:0,d0:15,d1:18,d23:19,d45:20,d67:21,d89:22},
 ];
-const GS_CAL=[{k:'d0',l:'0'},{k:'d1',l:'1'},{k:'d23',l:'2,3'},{k:'d45',l:'4,5'},{k:'d67',l:'6,7'},{k:'d89',l:'8,9'}];
+const GS_CAL=[
+  {k:'d0',l:'0'},{k:'d1',l:'1'},{k:'d23',l:'2,3'},
+  {k:'d45',l:'4,5'},{k:'d67',l:'6,7'},{k:'d89',l:'8,9'}
+];
+
 function buildCalEvs(){
   const evs=[];
-  PDT_CRON.forEach(r=>GS_CAL.forEach(g=>{if(r[g.k])evs.push({f:new Date(r.a,r.m,r[g.k]),t:'pdt',tx:'PDT 621 ('+r.p+') - RUC ...'+g.l,per:r.p});}));
-  SIRE_CRON.forEach(r=>GS_CAL.forEach(g=>{if(r[g.k])evs.push({f:new Date(r.a,r.m,r[g.k]),t:'sire',tx:'SIRE ('+r.p+') - RUC ...'+g.l,per:r.p});}));
+  PDT_CRON.forEach(function(r){GS_CAL.forEach(function(g){if(r[g.k])evs.push({f:new Date(r.a,r.m,r[g.k]),t:'pdt',tx:'Venc. PDT 621 ('+r.p+') — R...'+g.l,per:r.p,dig:g.l});});});
+  SIRE_CRON.forEach(function(r){GS_CAL.forEach(function(g){if(r[g.k])evs.push({f:new Date(r.a,r.m,r[g.k]),t:'sire',tx:'Venc. SIRE ('+r.p+') — R...'+g.l,per:r.p,dig:g.l});});});
   return evs;
 }
 const CAL_EVS=buildCalEvs();
-let calAnio=new Date().getFullYear(),calMes=new Date().getMonth(),calVista='mes';
-function calGetD(a,m,d){return CAL_EVS.filter(e=>e.f.getFullYear()===a&&e.f.getMonth()===m&&e.f.getDate()===d);}
+var calAnio=new Date().getFullYear();
+var calMes=new Date().getMonth();
+var calVista='mes';
+var calDiaSelec=new Date().getDate();
+
+function calGetD(a,m,d){return CAL_EVS.filter(function(e){return e.f.getFullYear()===a&&e.f.getMonth()===m&&e.f.getDate()===d;});}
+
 function calRender(){
-  document.getElementById('cal-titulo').textContent=MESES_CAL[calMes].charAt(0).toUpperCase()+MESES_CAL[calMes].slice(1)+' de '+calAnio;
-  if(calVista==='mes'){document.getElementById('cal-vista-mes').style.display='';document.getElementById('cal-vista-agenda').style.display='none';calRenderMes();}
-  else{document.getElementById('cal-vista-mes').style.display='none';document.getElementById('cal-vista-agenda').style.display='';calRenderAgenda();}
+  var cap=MESES_CAL[calMes].charAt(0).toUpperCase()+MESES_CAL[calMes].slice(1)+' de '+calAnio;
+  document.getElementById('cal-titulo').textContent=cap;
+  document.getElementById('cal-vista-mes').style.display=calVista==='mes'?'':'none';
+  document.getElementById('cal-vista-semana').style.display=calVista==='semana'?'':'none';
+  document.getElementById('cal-vista-dia').style.display=calVista==='dia'?'':'none';
+  document.getElementById('cal-vista-agenda').style.display=calVista==='agenda'?'':'none';
+  if(calVista==='mes')calRenderMes();
+  else if(calVista==='semana')calRenderSemana();
+  else if(calVista==='dia')calRenderDia();
+  else calRenderAgenda();
 }
+
 function calRenderMes(){
-  const hoy=new Date();
-  const primer=new Date(calAnio,calMes,1);
-  let dow=primer.getDay();dow=dow===0?6:dow-1;
-  const dim=new Date(calAnio,calMes+1,0).getDate();
-  const dma=new Date(calAnio,calMes,0).getDate();
-  const total=Math.ceil((dow+dim)/7)*7;
-  let html='';
-  for(let i=0;i<total;i++){
-    let d,m2,a2,other=false;
+  var hoy=new Date();
+  var primer=new Date(calAnio,calMes,1);
+  var dow=primer.getDay();dow=dow===0?6:dow-1;
+  var dim=new Date(calAnio,calMes+1,0).getDate();
+  var dma=new Date(calAnio,calMes,0).getDate();
+  var total=Math.ceil((dow+dim)/7)*7;
+  var html='';
+  for(var i=0;i<total;i++){
+    var d,m2,a2,other=false;
     if(i<dow){d=dma-dow+i+1;m2=calMes-1;a2=calMes===0?calAnio-1:calAnio;if(m2<0)m2=11;other=true;}
     else if(i>=dow+dim){d=i-dow-dim+1;m2=calMes+1;a2=calMes===11?calAnio+1:calAnio;if(m2>11)m2=0;other=true;}
     else{d=i-dow+1;m2=calMes;a2=calAnio;}
-    const esHoy=!other&&d===hoy.getDate()&&calMes===hoy.getMonth()&&calAnio===hoy.getFullYear();
-    const evs=other?[]:calGetD(a2,m2,d);
-    const pdts=evs.filter(e=>e.t==='pdt');
-    const sires=evs.filter(e=>e.t==='sire');
-    html+='<div class="cal-full-day'+(other?' othermonth':'')+(esHoy?' istoday':'')+'"><div class="cal-dn">'+d+'</div>';
-    if(pdts.length)html+='<div class="cal-ev pdt" title="'+pdts.map(e=>e.tx).join('\n')+'">Venc. PDT 621 ('+pdts[0].per.split('-')[0]+') - R...</div>';
-    if(sires.length)html+='<div class="cal-ev sire" title="'+sires.map(e=>e.tx).join('\n')+'">Venc. SIRE ('+sires[0].per.split('-')[0]+') - R...</div>';
+    var esHoy=!other&&d===hoy.getDate()&&calMes===hoy.getMonth()&&calAnio===hoy.getFullYear();
+    var evs=other?[]:calGetD(a2,m2,d);
+    var pdts=evs.filter(function(e){return e.t==='pdt';});
+    var sires=evs.filter(function(e){return e.t==='sire';});
+    html+='<div class="cal-full-day'+(other?' othermonth':'')+(esHoy?' istoday':'')+'">';
+    html+='<div class="cal-dn">'+d+'</div>';
+    if(pdts.length>0)html+='<div class="cal-ev pdt" title="PDT 621 ('+pdts[0].per+') — digitos '+pdts.map(function(e){return e.dig;}).join(', ')+'">Venc. PDT 621 ('+pdts[0].per.split('-')[0]+') — R...</div>';
+    if(sires.length>0)html+='<div class="cal-ev sire" title="SIRE ('+sires[0].per+') — digitos '+sires.map(function(e){return e.dig;}).join(', ')+'">Venc. SIRE ('+sires[0].per.split('-')[0]+') — R...</div>';
     html+='</div>';
   }
   document.getElementById('cal-cells').innerHTML=html;
 }
-function calRenderAgenda(){
-  const hoy=new Date();
-  const evsMes=CAL_EVS.filter(e=>e.f.getFullYear()===calAnio&&e.f.getMonth()===calMes).sort((a,b)=>a.f-b.f);
-  if(!evsMes.length){document.getElementById('cal-agenda-content').innerHTML='<div style="color:var(--ink-soft);font-size:14px;padding:20px 0;">Sin vencimientos este mes.</div>';return;}
-  const pd={};evsMes.forEach(e=>{const k=e.f.getDate();if(!pd[k])pd[k]=[];pd[k].push(e);});
-  document.getElementById('cal-agenda-content').innerHTML=Object.keys(pd).sort((a,b)=>a-b).map(d=>{
-    const f=new Date(calAnio,calMes,d);const esH=f.toDateString()===hoy.toDateString();
-    return '<div class="ag-group"><div class="ag-head"'+(esH?' style="color:var(--primary);"':'')+'>'+DIAS_CAL[f.getDay()]+', '+d+' de '+MESES_CAL[calMes]+' '+calAnio+(esH?' - Hoy':'')+' </div>'+pd[d].map(e=>'<div class="ag-ev '+e.t+'"><div class="ag-dot '+e.t+'"></div><div class="ag-text">'+e.tx+'</div></div>').join('')+'</div>';
-  }).join('');
+
+function calRenderSemana(){
+  var hoy=new Date();
+  var lunes=new Date(calAnio,calMes,1);
+  // Ir al lunes de la semana actual
+  var primerDia=new Date(calAnio,calMes,1);
+  var dowP=primerDia.getDay();dowP=dowP===0?6:dowP-1;
+  var semanaBase=new Date(calAnio,calMes,1-dowP);
+
+  var html='<div style="overflow-x:auto;">';
+  html+='<table style="width:100%;border-collapse:collapse;min-width:600px;">';
+  html+='<thead><tr><th style="width:60px;padding:8px;border-bottom:1px solid #e5e7eb;"></th>';
+  var dias=['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
+  var fechaSem=new Date(semanaBase);
+  for(var i=0;i<7;i++){
+    var esH=fechaSem.toDateString()===hoy.toDateString();
+    html+='<th style="padding:8px 4px;border-bottom:1px solid #e5e7eb;text-align:center;font-size:12px;color:'+(esH?'#2563EB':'#6b7280')+';font-weight:600;">'+dias[i]+' <span style="font-size:16px;font-weight:700;color:'+(esH?'#2563EB':'#111827')+';">'+fechaSem.getDate()+'</span></th>';
+    fechaSem.setDate(fechaSem.getDate()+1);
+  }
+  html+='</tr></thead><tbody>';
+
+  // Filas de horas (8am - 8pm)
+  for(var h=8;h<=20;h++){
+    html+='<tr><td style="padding:4px 8px;border-bottom:1px solid #f3f4f6;font-size:11px;color:#9ca3af;white-space:nowrap;vertical-align:top;">'+(h<10?'0':'')+h+':00</td>';
+    var fd=new Date(semanaBase);
+    for(var d=0;d<7;d++){
+      var evsDia=calGetD(fd.getFullYear(),fd.getMonth(),fd.getDate());
+      var evsHora=evsDia.filter(function(e){return true;}); // todos los eventos del dia
+      html+='<td style="padding:2px;border-bottom:1px solid #f3f4f6;border-left:1px solid #f3f4f6;min-height:40px;vertical-align:top;">';
+      if(h===9&&evsHora.length>0){
+        evsHora.forEach(function(ev){
+          html+='<div class="cal-ev '+ev.t+'" style="margin-bottom:2px;font-size:10px;">'+ev.tx.substring(0,20)+'...</div>';
+        });
+      }
+      html+='</td>';
+      fd.setDate(fd.getDate()+1);
+    }
+    html+='</tr>';
+  }
+  html+='</tbody></table></div>';
+  document.getElementById('cal-semana-content').innerHTML=html;
 }
+
+function calRenderDia(){
+  var hoy=new Date();
+  var fecha=new Date(calAnio,calMes,calDiaSelec);
+  var esH=fecha.toDateString()===hoy.toDateString();
+  var evsDia=calGetD(calAnio,calMes,calDiaSelec);
+  var html='<h3 style="font-size:16px;font-weight:600;color:#111827;margin:0 0 16px;">';
+  html+=DIAS_CAL[fecha.getDay()]+', '+calDiaSelec+' de '+MESES_CAL[calMes]+' '+calAnio;
+  if(esH)html+=' <span style="font-size:12px;color:#f59e0b;font-weight:700;">Hoy</span>';
+  html+='</h3>';
+  if(evsDia.length===0){
+    html+='<div style="color:#9ca3af;font-size:14px;padding:20px 0;">Sin vencimientos este dia.</div>';
+  } else {
+    evsDia.forEach(function(ev){
+      html+='<div class="ag-ev '+ev.t+'" style="margin-bottom:8px;"><div class="ag-dot '+ev.t+'"></div><div><div class="ag-text '+ev.t+'">'+ev.tx+'</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">RUC terminado en '+ev.dig+'</div></div></div>';
+    });
+  }
+  document.getElementById('cal-dia-content').innerHTML=html;
+}
+
+function calRenderAgenda(){
+  var hoy=new Date();
+  var evsMes=CAL_EVS.filter(function(e){return e.f.getFullYear()===calAnio&&e.f.getMonth()===calMes;}).sort(function(a,b){return a.f-b.f;});
+  if(!evsMes.length){
+    document.getElementById('cal-agenda-content').innerHTML='<div style="color:#9ca3af;font-size:14px;padding:20px 0;">Sin vencimientos este mes.</div>';
+    return;
+  }
+  var pd={};
+  evsMes.forEach(function(e){var k=e.f.getDate();if(!pd[k])pd[k]=[];pd[k].push(e);});
+  var html=Object.keys(pd).sort(function(a,b){return a-b;}).map(function(d){
+    var f=new Date(calAnio,calMes,d);
+    var esH=f.toDateString()===hoy.toDateString();
+    var out='<div class="ag-group"><div class="ag-head"'+(esH?' style="color:#2563EB;"':'')+'>'+DIAS_CAL[f.getDay()]+', '+d+' de '+MESES_CAL[calMes]+' '+calAnio+(esH?' — Hoy':'')+' </div>';
+    pd[d].forEach(function(e){out+='<div class="ag-ev '+e.t+'"><div class="ag-dot '+e.t+'"></div><div class="ag-text '+e.t+'">'+e.tx+'</div></div>';});
+    out+='</div>';
+    return out;
+  }).join('');
+  document.getElementById('cal-agenda-content').innerHTML=html;
+}
+
 function calCambiarMes(d){calMes+=d;if(calMes>11){calMes=0;calAnio++;}if(calMes<0){calMes=11;calAnio--;}calRender();}
-function calHoy(){const h=new Date();calAnio=h.getFullYear();calMes=h.getMonth();calRender();}
+function calHoy(){var h=new Date();calAnio=h.getFullYear();calMes=h.getMonth();calDiaSelec=h.getDate();calRender();}
 function calSetVista(v){
   calVista=v;
-  document.getElementById('cal-btn-mes').classList.toggle('active',v==='mes');
-  document.getElementById('cal-btn-agenda').classList.toggle('active',v==='agenda');
+  ['mes','semana','dia','agenda'].forEach(function(n){
+    var btn=document.getElementById('cal-btn-'+n);
+    if(btn)btn.classList.toggle('active',n===v);
+  });
   calRender();
 }
 
