@@ -1284,18 +1284,18 @@ function renderTimeline(lista){
 const MESES_CAL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DIAS_CAL=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
 const PDT_CRON=[
-  {p:'Ene-2026',a:2026,m:1,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
-  {p:'Feb-2026',a:2026,m:2,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
-  {p:'Mar-2026',a:2026,m:3,d0:17,d1:20,d23:21,d45:22,d67:23,d89:24},
-  {p:'Abr-2026',a:2026,m:4,d0:18,d1:19,d23:20,d45:21,d67:22,d89:25},
-  {p:'May-2026',a:2026,m:5,d0:15,d1:16,d23:17,d45:18,d67:19,d89:22},
-  {p:'Jun-2026',a:2026,m:6,d0:15,d1:16,d23:17,d45:20,d67:21,d89:22},
-  {p:'Jul-2026',a:2026,m:7,d0:18,d1:19,d23:20,d45:21,d67:24,d89:25},
-  {p:'Ago-2026',a:2026,m:8,d0:15,d1:16,d23:17,d45:18,d67:21,d89:22},
-  {p:'Set-2026',a:2026,m:9,d0:16,d1:19,d23:20,d45:21,d67:22,d89:23},
-  {p:'Oct-2026',a:2026,m:10,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23},
-  {p:'Nov-2026',a:2026,m:11,d0:17,d1:18,d23:21,d45:22,d67:23,d89:24},
-  {p:'Dic-2026',a:2027,m:0,d0:18,d1:19,d23:20,d45:21,d67:22,d89:25},
+  {p:'Ene-2026',a:2026,m:1,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23,dBC:24},
+  {p:'Feb-2026',a:2026,m:2,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23,dBC:24},
+  {p:'Mar-2026',a:2026,m:3,d0:17,d1:20,d23:21,d45:22,d67:23,d89:24,dBC:27},
+  {p:'Abr-2026',a:2026,m:4,d0:18,d1:19,d23:20,d45:21,d67:22,d89:25,dBC:26},
+  {p:'May-2026',a:2026,m:5,d0:15,d1:16,d23:17,d45:18,d67:19,d89:22,dBC:23},
+  {p:'Jun-2026',a:2026,m:6,d0:15,d1:16,d23:17,d45:20,d67:21,d89:22,dBC:24},
+  {p:'Jul-2026',a:2026,m:7,d0:18,d1:19,d23:20,d45:21,d67:24,d89:25,dBC:26},
+  {p:'Ago-2026',a:2026,m:8,d0:15,d1:16,d23:17,d45:18,d67:21,d89:22,dBC:23},
+  {p:'Set-2026',a:2026,m:9,d0:16,d1:19,d23:20,d45:21,d67:22,d89:23,dBC:26},
+  {p:'Oct-2026',a:2026,m:10,d0:16,d1:17,d23:18,d45:19,d67:20,d89:23,dBC:24},
+  {p:'Nov-2026',a:2026,m:11,d0:17,d1:18,d23:21,d45:22,d67:23,d89:24,dBC:28},
+  {p:'Dic-2026',a:2027,m:0,d0:18,d1:19,d23:20,d45:21,d67:22,d89:25,dBC:26},
 ];
 const SIRE_CRON=[
   {p:'Ene-2026',a:2026,m:1,d0:13,d1:16,d23:17,d45:18,d67:19,d89:20},
@@ -1311,7 +1311,7 @@ const SIRE_CRON=[
   {p:'Nov-2026',a:2026,m:11,d0:16,d1:17,d23:18,d45:21,d67:22,d89:23},
   {p:'Dic-2026',a:2027,m:0,d0:15,d1:18,d23:19,d45:20,d67:21,d89:22},
 ];
-const GS_CAL=[{k:'d0',l:'0'},{k:'d1',l:'1'},{k:'d23',l:'2,3'},{k:'d45',l:'4,5'},{k:'d67',l:'6,7'},{k:'d89',l:'8,9'}];
+const GS_CAL=[{k:'d0',l:'0'},{k:'d1',l:'1'},{k:'d23',l:'2,3'},{k:'d45',l:'4,5'},{k:'d67',l:'6,7'},{k:'d89',l:'8,9'},{k:'dBC',l:'Buenos Cont.'}];
 function buildCalEvs(){
   const evs=[];
   PDT_CRON.forEach(r=>GS_CAL.forEach(g=>{if(r[g.k])evs.push({f:new Date(r.a,r.m,r[g.k]),t:'pdt',tx:'PDT 621 ('+r.p+') - RUC ...'+g.l,per:r.p});}));
@@ -1352,8 +1352,8 @@ function calRenderMes(){
     const pdts=evs.filter(e=>e.t==='pdt');
     const sires=evs.filter(e=>e.t==='sire');
     html+='<div class="cal-full-day'+(other?' othermonth':'')+(esHoy?' istoday':'')+'"><div class="cal-dn">'+d+'</div>';
-    if(pdts.length)html+='<div class="cal-ev pdt" title="'+pdts.map(e=>e.tx).join('\n')+'">Venc. PDT 621 ('+pdts[0].per.split('-')[0]+') - R...</div>';
-    if(sires.length)html+='<div class="cal-ev sire" title="'+sires.map(e=>e.tx).join('\n')+'">Venc. SIRE ('+sires[0].per.split('-')[0]+') - R...</div>';
+    if(pdts.length)html+='<div class="cal-ev pdt" title="'+pdts.map(e=>e.tx).join('\n')+'">Venc. PDT 621 ('+pdts[0].per.split('-')[0]+') — RUC '+pdts.map(function(e){return e.tx.split('...')[1];}).join(',')+'</div>';
+    if(sires.length)html+='<div class="cal-ev sire" title="'+sires.map(e=>e.tx).join('\n')+'">Venc. SIRE ('+sires[0].per.split('-')[0]+') — RUC '+sires.map(function(e){return e.tx.split('...')[1];}).join(',')+'</div>';
     html+='</div>';
   }
   document.getElementById('cal-cells').innerHTML=html;
