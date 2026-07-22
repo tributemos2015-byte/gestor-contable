@@ -831,17 +831,52 @@ async function toggleActivo(id, nuevoEstado){
 
 // ----- Eliminar cliente -----
 // Detectar si la extensión está activa (se setea al cargar la página)
-function abrirSunat(clienteId, destino) {
-  // Crear un <a> temporal y hacer click — nunca bloqueado por el navegador
-  // porque es un click directo del usuario, no window.open() desde JS async
-  const url = API_URL + '/clientes/' + clienteId + '/login-sunat?destino=' + destino;
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+async function abrirSunat(clienteId, destino) {
+  const btnEl = event && event.target ? event.target : null;
+  const textoOriginal = btnEl ? btnEl.textContent : '';
+  if (btnEl) { btnEl.textContent = 'Cargando...'; btnEl.disabled = true; }
+  try {
+    const res = await fetch(API_URL + '/clientes/' + clienteId + '/credenciales');
+    if (!res.ok) throw new Error('No se pudieron obtener las credenciales');
+    const creds = await res.json();
+    if (creds.error) throw new Error(creds.error);
+    const urlSunat = destino === 'declaraciones'
+      ? 'https://e-menu.sunat.gob.pe/cl-ti-itmenu2/MenuInternetPlataforma.htm'
+      : 'https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm';
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    const div = document.createElement('div');
+    div.style.cssText = 'background:#fff;border-radius:16px;padding:28px;width:380px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+    div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">'
+      + '<div style="font-size:16px;font-weight:700;color:#241C15;">Credenciales SOL</div>'
+      + '<span id="cerrar-modal-sol" style="cursor:pointer;font-size:22px;color:#888;line-height:1;">×</span>'
+      + '</div>'
+      + '<div style="background:#F5F9FF;border:1px solid #BFDBFE;border-radius:10px;padding:16px;margin-bottom:16px;">'
+      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:10px;">Datos para ingresar</div>'
+      + '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb;">'
+      + '<span style="font-size:13px;color:#6b7280;">RUC</span>'
+      + '<span style="font-size:13px;font-weight:700;font-family:monospace;">' + escapeHtml(creds.ruc) + '</span></div>'
+      + '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb;">'
+      + '<span style="font-size:13px;color:#6b7280;">Usuario SOL</span>'
+      + '<span style="font-size:13px;font-weight:700;font-family:monospace;">' + escapeHtml(creds.usuarioSol) + '</span></div>'
+      + '<div style="display:flex;justify-content:space-between;padding:6px 0;">'
+      + '<span style="font-size:13px;color:#6b7280;">Clave SOL</span>'
+      + '<span style="font-size:13px;font-weight:700;font-family:monospace;">' + escapeHtml(creds.claveSol) + '</span></div>'
+      + '</div>'
+      + '<div style="font-size:12px;color:#6b7280;margin-bottom:16px;">Copia estos datos y pegalos en SUNAT cuando se abra.</div>'
+      + '<a id="btn-abrir-sunat-link" href="' + urlSunat + '" target="_blank" rel="noopener" '
+      + 'style="display:block;text-align:center;background:#C4501C;color:#fff;padding:12px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">'
+      + 'Abrir SUNAT →</a>';
+    modal.appendChild(div);
+    document.body.appendChild(modal);
+    document.getElementById('cerrar-modal-sol').onclick = function(){ modal.remove(); };
+    document.getElementById('btn-abrir-sunat-link').onclick = function(){ setTimeout(function(){ modal.remove(); }, 800); };
+    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+  } catch(err) {
+    alert('Error: ' + err.message);
+  } finally {
+    if (btnEl) { btnEl.textContent = textoOriginal; btnEl.disabled = false; }
+  }
 }
 
 async function eliminarCliente(id){
