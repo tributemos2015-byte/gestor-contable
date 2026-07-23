@@ -833,7 +833,7 @@ async function toggleActivo(id, nuevoEstado){
 // Detectar si la extensión está activa (se setea al cargar la página)
 async function abrirSunat(clienteId, destino) {
   // Visor streaming — login automático sin instalar nada
-  window.open(API_URL + '/sunat/' + clienteId + '/ver', '_blank');
+  window.open(API_URL + '/sunat/' + clienteId + '/ver?destino=' + destino, '_blank');
 }
 
 async function eliminarCliente(id){
