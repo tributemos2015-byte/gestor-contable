@@ -904,8 +904,15 @@ async function toggleActivo(id, nuevoEstado){
 // ----- Eliminar cliente -----
 // Detectar si la extensión está activa (se setea al cargar la página)
 async function abrirSunat(clienteId, destino) {
-  // Visor streaming — login automático sin instalar nada
-  window.open(API_URL + '/sunat/' + clienteId + '/ver?destino=' + destino, '_blank');
+  // Requiere la extension "GestorContable - Acceso SUNAT" instalada en Chrome
+  const instalada = document.documentElement.getAttribute('data-gc-extension') === '1';
+  if (!instalada) {
+    alert('Falta instalar la extension "GestorContable - Acceso SUNAT" en este navegador.\n\nSin ella el boton no puede iniciar sesion automaticamente.');
+    return;
+  }
+  window.dispatchEvent(new CustomEvent('GC_ABRIR_SUNAT', {
+    detail: { clienteId: clienteId, destino: destino }
+  }));
 }
 
 async function eliminarCliente(id){
