@@ -222,6 +222,10 @@
       <a class="nav-item" href="#">Estado de descarga</a>
     </div>
 
+    <div class="nav-group-label">Trámites SUNAT</div>
+    <a class="nav-item" href="#" id="nav-tramites" onclick="mostrarVista('tramites');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>Trámites</a>
+    <a class="nav-item" href="#" id="nav-declaraciones" onclick="mostrarVista('declaraciones');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Declaraciones</a>
+
     <div class="nav-group-label">Ajustes</div>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/></svg>Tipo de cambio</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Configuración de email</a>
@@ -652,6 +656,70 @@
     <div class="footer-note">GestorContable · Panel de demostración con datos de ejemplo · Diseño original</div>
     </div>
     <!-- fin view-dashboard -->
+    <!-- ============ VISTA: TRÁMITES ============ -->
+    <div id="view-tramites" style="display:none;">
+      <div class="hero" style="margin-bottom:24px;">
+        <div>
+          <h1>Trámites SUNAT</h1>
+          <p>Accede directamente a los trámites más usados del portal SOL.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/></svg>Comprobantes de Pago</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Emisión de facturas, boletas y notas de crédito/débito en el portal SUNAT.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22comprobantes%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>Solicitudes y Procedimientos</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Fraccionamientos, aplazamientos, constancias y otros trámites administrativos.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22tramites%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3"/><circle cx="12" cy="12" r="3.5"/></svg>Ficha RUC</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Actualización de datos, modificación de domicilio fiscal y actividades económicas.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22ruc%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>Descarga de Archivos</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Descarga constancias, resoluciones y archivos del buzón electrónico SUNAT.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22buzon%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VISTA: DECLARACIONES ============ -->
+    <div id="view-declaraciones" style="display:none;">
+      <div class="hero" style="margin-bottom:24px;">
+        <div>
+          <h1>Declaraciones SUNAT</h1>
+          <p>Presenta y consulta tus declaraciones mensuales y anuales.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>PDT 621 — IGV / Renta</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Declaración mensual de IGV y pagos a cuenta del Impuesto a la Renta.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22declaraciones%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>PLAME — Planilla</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Declaración mensual de planilla electrónica de trabajadores.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22declaraciones%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>DJ Anual — Renta</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Declaración Jurada Anual del Impuesto a la Renta de tercera categoría.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22declaraciones%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Consulta de Declaraciones</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">Revisa el historial de declaraciones presentadas y sus estados.</p>
+          <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22consultas%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -673,11 +741,15 @@ function mostrarVista(vista){
   document.getElementById('view-buzonsol').style.display = vista === 'buzonsol' ? 'block' : 'none';
   document.getElementById('view-buzonelectronico').style.display = vista === 'buzonelectronico' ? 'block' : 'none';
   document.getElementById('view-calendario').style.display = vista === 'calendario' ? 'block' : 'none';
+  document.getElementById('view-tramites').style.display = vista === 'tramites' ? 'block' : 'none';
+  document.getElementById('view-declaraciones').style.display = vista === 'declaraciones' ? 'block' : 'none';
   document.getElementById('nav-dashboard').classList.toggle('active', vista === 'dashboard');
   document.getElementById('nav-clientes').classList.toggle('active', vista === 'clientes');
   document.getElementById('nav-buzonsol').classList.toggle('active', vista === 'buzonsol');
   document.getElementById('nav-buzonelectronico').classList.toggle('active', vista === 'buzonelectronico');
   document.getElementById('nav-calendario').classList.toggle('active', vista === 'calendario');
+  document.getElementById('nav-tramites').classList.toggle('active', vista === 'tramites');
+  document.getElementById('nav-declaraciones').classList.toggle('active', vista === 'declaraciones');
   if (vista === 'clientes') cargarClientes();
   if (vista === 'buzonsol') cargarNotificaciones();
   if (vista === 'buzonelectronico') cargarBuzonElectronico();
