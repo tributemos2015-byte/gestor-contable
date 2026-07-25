@@ -733,6 +733,13 @@ function toggleSub(el){
 // ----- Configuración de la API -----
 // Debe coincidir con el puerto de src/server.js (API_PORT en .env, por defecto 3001)
 const API_URL = 'https://161-153-200-73.nip.io';
+
+// ===== CONFIGURACIÓN REPORTE TRIBUTARIO (editable) =====
+// Para cambiar los correos de destino, edita solo estas líneas:
+const CORREOS_REPORTE = [
+  'tributemos2015@gmail.com',
+  'tributemos@hotmail.com'
+];
 document.getElementById('api-url-shown').textContent = API_URL;
 
 // ----- Navegación entre vistas -----
@@ -805,7 +812,7 @@ function renderTablaClientes(clientes){
           <span class="tag" style="background:${c.activo ? 'var(--green-tint)' : 'var(--red-tint)'};color:${c.activo ? 'var(--green)' : 'var(--red)'};">${c.activo ? 'Activo' : 'Pausado'}</span>
         </td>
         <td style="padding:10px 8px;text-align:right;">
-          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:4px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button id="btn-ficha-${c.id}" onclick="descargarFichaRuc('${c.id}')" style="border:1px solid var(--primary);background:var(--primary-tint, #eef2ff);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--primary);font-weight:600;margin-right:6px;" title="Descargar Ficha RUC en PDF (tarda 1-2 min)">📄 Ficha RUC</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
+          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:4px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button id="btn-ficha-${c.id}" onclick="descargarFichaRuc('${c.id}')" style="border:1px solid var(--primary);background:var(--primary-tint, #eef2ff);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--primary);font-weight:600;margin-right:6px;" title="Descargar Ficha RUC en PDF (tarda 1-2 min)">📄 Ficha RUC</button><button id="btn-reporte-${c.id}" onclick="solicitarReporteTributario('${c.id}')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:6px;" title="Solicitar Reporte Tributario para Terceros por correo (tarda 2-4 min)">📧 Reporte Trib.</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
           <button onclick="eliminarCliente('${c.id}')" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--red);">Eliminar</button>
         </td>
       </tr>
@@ -954,6 +961,62 @@ async function descargarFichaRuc(clienteId) {
       setTimeout(() => { btn.textContent = textoOriginal; }, 3000);
     } else {
       alert('El robot no pudo descargar la ficha:\n' + (data.error || 'Error desconocido'));
+      btn.textContent = textoOriginal;
+    }
+  } catch (e) {
+    alert('Error de conexión con el robot: ' + e.message);
+    btn.textContent = textoOriginal;
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+}
+
+// ===== REPORTE TRIBUTARIO PARA TERCEROS: solicitud por correo via robot Selenium =====
+async function solicitarReporteTributario(clienteId) {
+  const btn = document.getElementById(`btn-reporte-${clienteId}`);
+  const textoOriginal = btn.textContent;
+  try {
+    // 1. Obtener credenciales del cliente
+    const resp = await fetch(`${API_URL}/clientes/${clienteId}/credenciales`);
+    if (!resp.ok) throw new Error('No se pudieron obtener las credenciales del cliente');
+    const creds = await resp.json();
+
+    // 2. Confirmar con el usuario antes de gastar un reporte del día (SUNAT permite 3/día)
+    const okConfirm = confirm(
+      'Solicitar Reporte Tributario para Terceros del RUC ' + creds.ruc + '\n\n' +
+      'SUNAT lo enviará por correo a:\n• ' + CORREOS_REPORTE.join('\n• ') + '\n\n' +
+      'El proceso tarda 2-4 minutos. ¿Continuar?'
+    );
+    if (!okConfirm) return;
+
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.textContent = '⏳ Solicitando...';
+
+    // 3. Llamar al robot (2 pasadas: una por correo, ~2-4 min en total)
+    const res = await fetch(`${API_URL}/robot/reporte-tributario`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ruc: creds.ruc,
+        usuario: creds.usuario || creds.usuarioSol,
+        clave: creds.clave || creds.claveSol,
+        correos: CORREOS_REPORTE
+      })
+    });
+    const data = await res.json();
+
+    // 4. Mostrar el resultado por correo
+    const detalle = (data.resultados || [])
+      .map(x => (x.ok ? '✅ ' : '❌ ') + x.correo + (x.ok ? '' : ' — ' + x.mensaje))
+      .join('\n');
+    if (data.ok) {
+      alert('📧 ¡Reporte solicitado!\n\n' + detalle + '\n\nRevisa las bandejas (y spam) en unos minutos.');
+      btn.textContent = '✅ Solicitado';
+      setTimeout(() => { btn.textContent = textoOriginal; }, 3000);
+    } else {
+      alert('⚠️ El robot no pudo completar la solicitud:\n\n' + (detalle || data.error || 'Error desconocido'));
       btn.textContent = textoOriginal;
     }
   } catch (e) {
