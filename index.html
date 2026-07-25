@@ -1057,7 +1057,7 @@ async function solicitarReporteTributario(clienteId) {
     const okConfirm = confirm(
       'Solicitar Reporte Tributario para Terceros del RUC ' + creds.ruc + '\n\n' +
       'SUNAT lo enviará por correo a:\n• ' + correosDestino.join('\n• ') + '\n\n' +
-      'El proceso tarda 2-4 minutos. ¿Continuar?'
+      'La solicitud se confirma al instante y los correos llegan en 3-6 minutos. ¿Continuar?'
     );
     if (!okConfirm) return;
 
@@ -1078,16 +1078,15 @@ async function solicitarReporteTributario(clienteId) {
     });
     const data = await res.json();
 
-    // 4. Mostrar el resultado por correo
-    const detalle = (data.resultados || [])
-      .map(x => (x.ok ? '✅ ' : '❌ ') + x.correo + (x.ok ? '' : ' — ' + x.mensaje))
-      .join('\n');
+    // 4. Respuesta inmediata: el robot trabaja en segundo plano y SUNAT envía los correos
     if (data.ok) {
-      alert('📧 ¡Reporte solicitado!\n\n' + detalle + '\n\nRevisa las bandejas (y spam) en unos minutos.');
+      alert('📧 ¡Solicitud iniciada!\n\nEl robot está procesando el pedido. SUNAT enviará el reporte a:\n• ' +
+        (data.correos || correosDestino).join('\n• ') +
+        '\n\nLos correos llegarán en unos 3-6 minutos.\nRevisa también la carpeta de spam.');
       btn.textContent = '✅ Solicitado';
-      setTimeout(() => { btn.textContent = textoOriginal; }, 3000);
+      setTimeout(() => { btn.textContent = textoOriginal; }, 5000);
     } else {
-      alert('⚠️ El robot no pudo completar la solicitud:\n\n' + (detalle || data.error || 'Error desconocido'));
+      alert('⚠️ No se pudo iniciar la solicitud:\n\n' + (data.error || data.mensaje || 'Error desconocido'));
       btn.textContent = textoOriginal;
     }
   } catch (e) {
