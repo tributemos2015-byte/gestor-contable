@@ -805,7 +805,7 @@ function renderTablaClientes(clientes){
           <span class="tag" style="background:${c.activo ? 'var(--green-tint)' : 'var(--red-tint)'};color:${c.activo ? 'var(--green)' : 'var(--red)'};">${c.activo ? 'Activo' : 'Pausado'}</span>
         </td>
         <td style="padding:10px 8px;text-align:right;">
-          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:6px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
+          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:4px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button id="btn-ficha-${c.id}" onclick="descargarFichaRuc('${c.id}')" style="border:1px solid var(--primary);background:var(--primary-tint, #eef2ff);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--primary);font-weight:600;margin-right:6px;" title="Descargar Ficha RUC en PDF (tarda 1-2 min)">📄 Ficha RUC</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
           <button onclick="eliminarCliente('${c.id}')" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--red);">Eliminar</button>
         </td>
       </tr>
@@ -915,6 +915,54 @@ async function abrirSunat(clienteId, destino) {
   window.dispatchEvent(new CustomEvent('GC_ABRIR_SUNAT', {
     detail: { clienteId: clienteId, destino: destino }
   }));
+}
+
+// ===== FICHA RUC: descarga automática via robot Selenium =====
+async function descargarFichaRuc(clienteId) {
+  const btn = document.getElementById(`btn-ficha-${clienteId}`);
+  const textoOriginal = btn.textContent;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.textContent = '⏳ Descargando...';
+  try {
+    // 1. Obtener credenciales del cliente
+    const resp = await fetch(`${API_URL}/clientes/${clienteId}/credenciales`);
+    if (!resp.ok) throw new Error('No se pudieron obtener las credenciales del cliente');
+    const creds = await resp.json();
+
+    // 2. Llamar al robot (tarda 40-120 segundos: login SUNAT + descarga)
+    const res = await fetch(`${API_URL}/robot/ficha-ruc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ruc: creds.ruc,
+        usuario: creds.usuario || creds.usuarioSol,
+        clave: creds.clave || creds.claveSol
+      })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      // 3. Descargar el PDF en el navegador
+      const link = document.createElement('a');
+      link.href = 'data:application/pdf;base64,' + data.pdf;
+      link.download = `FichaRUC_${creds.ruc}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      btn.textContent = '✅ Descargada';
+      setTimeout(() => { btn.textContent = textoOriginal; }, 3000);
+    } else {
+      alert('El robot no pudo descargar la ficha:\n' + (data.error || 'Error desconocido'));
+      btn.textContent = textoOriginal;
+    }
+  } catch (e) {
+    alert('Error de conexión con el robot: ' + e.message);
+    btn.textContent = textoOriginal;
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
 }
 
 async function eliminarCliente(id){
