@@ -228,7 +228,7 @@
 
     <div class="nav-group-label">Ajustes</div>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/></svg>Tipo de cambio</a>
-    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Configuración de email</a>
+    <a class="nav-item" href="#" id="nav-configuracion" onclick="mostrarVista('configuracion');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Configuración de email</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 1 1-4-7.2"/><path d="M21 4v6h-6"/></svg>Notificaciones WhatsApp</a>
 
     <div class="sidebar-foot">
@@ -657,6 +657,36 @@
     <div class="footer-note">GestorContable · Panel de demostración con datos de ejemplo · Diseño original</div>
     </div>
     <!-- fin view-dashboard -->
+    <!-- ============ VISTA: CONFIGURACIÓN ============ -->
+    <div id="view-configuracion" style="display:none;">
+      <div class="hero" style="margin-bottom:24px;">
+        <div>
+          <h1>Configuración</h1>
+          <p>Ajustes del sistema. Los cambios se guardan en este navegador.</p>
+        </div>
+      </div>
+      <div class="panel" style="max-width:560px;display:flex;flex-direction:column;gap:14px;">
+        <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Correos del Reporte Tributario</div>
+        <p style="font-size:13px;color:var(--ink-soft);margin:0;">
+          Cuando uses el botón <b>📧 Reporte Trib.</b> de un cliente, SUNAT enviará el reporte a estos correos.
+          El segundo es opcional (sirve de respaldo porque SUNAT a veces demora). Máximo 2 — SUNAT solo permite 3 reportes por día por RUC.
+        </p>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Correo 1 (principal)</label>
+          <input type="email" id="cfg-correo1" placeholder="ejemplo@gmail.com" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Correo 2 (respaldo, opcional)</label>
+          <input type="email" id="cfg-correo2" placeholder="ejemplo@hotmail.com" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;box-sizing:border-box;">
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button onclick="guardarConfigCorreos()" style="border:none;background:var(--teal);color:#fff;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;">💾 Guardar</button>
+          <button onclick="restaurarConfigCorreos()" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 14px;font-size:13px;cursor:pointer;" title="Volver a los correos originales">↩ Restaurar originales</button>
+          <span id="cfg-correos-msg" style="font-size:13px;color:var(--green);display:none;">✅ Guardado</span>
+        </div>
+      </div>
+    </div>
+
     <!-- ============ VISTA: TRÁMITES ============ -->
     <div id="view-tramites" style="display:none;">
       <div class="hero" style="margin-bottom:24px;">
@@ -734,12 +764,49 @@ function toggleSub(el){
 // Debe coincidir con el puerto de src/server.js (API_PORT en .env, por defecto 3001)
 const API_URL = 'https://161-153-200-73.nip.io';
 
-// ===== CONFIGURACIÓN REPORTE TRIBUTARIO (editable) =====
-// Para cambiar los correos de destino, edita solo estas líneas:
-const CORREOS_REPORTE = [
+// ===== CORREOS DEL REPORTE TRIBUTARIO =====
+// Se cambian desde el menú: Ajustes → Configuración de email (sin tocar código).
+// Estos son solo los valores de fábrica si aún no se ha guardado nada:
+const CORREOS_REPORTE_DEFAULT = [
   'tributemos2015@gmail.com',
   'tributemos@hotmail.com'
 ];
+
+function obtenerCorreosReporte() {
+  try {
+    const guardados = JSON.parse(localStorage.getItem('gc_correos_reporte'));
+    if (Array.isArray(guardados) && guardados.length) return guardados;
+  } catch (e) {}
+  return CORREOS_REPORTE_DEFAULT;
+}
+
+function cargarConfigCorreos() {
+  const correos = obtenerCorreosReporte();
+  document.getElementById('cfg-correo1').value = correos[0] || '';
+  document.getElementById('cfg-correo2').value = correos[1] || '';
+}
+
+function guardarConfigCorreos() {
+  const c1 = document.getElementById('cfg-correo1').value.trim();
+  const c2 = document.getElementById('cfg-correo2').value.trim();
+  const esValido = c => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c);
+  if (!c1) { alert('Escribe al menos el Correo 1.'); return; }
+  if (!esValido(c1)) { alert('El Correo 1 no parece válido: ' + c1); return; }
+  if (c2 && !esValido(c2)) { alert('El Correo 2 no parece válido: ' + c2); return; }
+  const correos = c2 ? [c1, c2] : [c1];
+  localStorage.setItem('gc_correos_reporte', JSON.stringify(correos));
+  const msg = document.getElementById('cfg-correos-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2500);
+}
+
+function restaurarConfigCorreos() {
+  localStorage.removeItem('gc_correos_reporte');
+  cargarConfigCorreos();
+  const msg = document.getElementById('cfg-correos-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2500);
+}
 document.getElementById('api-url-shown').textContent = API_URL;
 
 // ----- Navegación entre vistas -----
@@ -751,6 +818,7 @@ function mostrarVista(vista){
   document.getElementById('view-calendario').style.display = vista === 'calendario' ? 'block' : 'none';
   document.getElementById('view-tramites').style.display = vista === 'tramites' ? 'block' : 'none';
   document.getElementById('view-declaraciones').style.display = vista === 'declaraciones' ? 'block' : 'none';
+  document.getElementById('view-configuracion').style.display = vista === 'configuracion' ? 'block' : 'none';
   document.getElementById('nav-dashboard').classList.toggle('active', vista === 'dashboard');
   document.getElementById('nav-clientes').classList.toggle('active', vista === 'clientes');
   document.getElementById('nav-buzonsol').classList.toggle('active', vista === 'buzonsol');
@@ -758,10 +826,12 @@ function mostrarVista(vista){
   document.getElementById('nav-calendario').classList.toggle('active', vista === 'calendario');
   document.getElementById('nav-tramites').classList.toggle('active', vista === 'tramites');
   document.getElementById('nav-declaraciones').classList.toggle('active', vista === 'declaraciones');
+  document.getElementById('nav-configuracion').classList.toggle('active', vista === 'configuracion');
   if (vista === 'clientes') cargarClientes();
   if (vista === 'buzonsol') cargarNotificaciones();
   if (vista === 'buzonelectronico') cargarBuzonElectronico();
   if (vista === 'calendario') calRender();
+  if (vista === 'configuracion') cargarConfigCorreos();
 }
 
 // ----- Modal nuevo cliente -----
@@ -981,11 +1051,12 @@ async function solicitarReporteTributario(clienteId) {
     const resp = await fetch(`${API_URL}/clientes/${clienteId}/credenciales`);
     if (!resp.ok) throw new Error('No se pudieron obtener las credenciales del cliente');
     const creds = await resp.json();
+    const correosDestino = obtenerCorreosReporte();
 
     // 2. Confirmar con el usuario antes de gastar un reporte del día (SUNAT permite 3/día)
     const okConfirm = confirm(
       'Solicitar Reporte Tributario para Terceros del RUC ' + creds.ruc + '\n\n' +
-      'SUNAT lo enviará por correo a:\n• ' + CORREOS_REPORTE.join('\n• ') + '\n\n' +
+      'SUNAT lo enviará por correo a:\n• ' + correosDestino.join('\n• ') + '\n\n' +
       'El proceso tarda 2-4 minutos. ¿Continuar?'
     );
     if (!okConfirm) return;
@@ -1002,7 +1073,7 @@ async function solicitarReporteTributario(clienteId) {
         ruc: creds.ruc,
         usuario: creds.usuario || creds.usuarioSol,
         clave: creds.clave || creds.claveSol,
-        correos: CORREOS_REPORTE
+        correos: correosDestino
       })
     });
     const data = await res.json();
