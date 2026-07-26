@@ -765,8 +765,11 @@
           <h1>Control de Declaraciones</h1>
           <p>Estado de cumplimiento tributario de todos tus clientes activos.</p>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <span id="ctrl-periodo-label" style="font-size:13px;color:var(--ink-soft);font-weight:600;"></span>
+          <select id="ctrl-selector-periodo" onchange="cargarControl()"
+            style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;font-weight:600;">
+          </select>
           <button onclick="cargarControl()" style="display:flex;align-items:center;gap:7px;padding:9px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.5 8.5 0 1 1-4-7.2"/><path d="M21 4v6h-6"/></svg>
             Actualizar
@@ -1834,6 +1837,25 @@ function renderTimeline(lista){
 // ===== CONTROL DE DECLARACIONES =====
 let _ctrlDatos = null;
 
+function _ctrlInicializarSelector() {
+  const sel = document.getElementById('ctrl-selector-periodo');
+  if (sel.options.length > 0) return; // ya inicializado
+  const hoy = new Date();
+  const opciones = [];
+  for (let i = 0; i < 12; i++) {
+    let m = hoy.getMonth() - i;
+    let y = hoy.getFullYear();
+    if (m < 0) { m += 12; y--; }
+    if (m === 0) { m = 12; y--; }
+    const val = y + '-' + String(m).padStart(2, '0');
+    const label = new Date(y, m - 1, 1).toLocaleString('es-PE', {month:'long', year:'numeric'});
+    opciones.push(`<option value="${val}">${label.charAt(0).toUpperCase()+label.slice(1)}</option>`);
+  }
+  sel.innerHTML = opciones.join('');
+  // Por defecto seleccionar mes anterior
+  if (sel.options.length > 1) sel.selectedIndex = 1;
+}
+
 const CTRL_MULTAS = new Set(['6041','6051','6061','6071','6075','6079','6083','6084','6085','6086','6087','6088','6089','6090','6111','6113','6114','6115','6116','6117','6118','6131','6132','6141','6142','6143','6151','6161','6191']);
 const CTRL_DETRACCION = new Set(['8073']);
 
@@ -1880,13 +1902,15 @@ function _ctrlMonto(ev){
 }
 
 async function cargarControl(){
+  _ctrlInicializarSelector();
+  const periodoSel = document.getElementById('ctrl-selector-periodo').value;
   const tbody=document.getElementById('ctrl-tbody');
   const msg=document.getElementById('ctrl-mensaje');
   tbody.innerHTML='<tr><td colspan="7" style="padding:32px 12px;color:var(--ink-soft);text-align:center;">⏳ Cargando datos...</td></tr>';
   msg.style.display='none';
   document.getElementById('ctrl-pie').style.display='none';
   try{
-    const res=await fetch(`${API_URL}/robot/cumplimiento`);
+    const res=await fetch(`${API_URL}/robot/cumplimiento?periodo=${periodoSel}`);
     if(!res.ok){
       if(res.status===404){tbody.innerHTML='<tr><td colspan="7" style="padding:32px 12px;color:var(--ink-soft);text-align:center;">No hay datos de cumplimiento aún. Corre el batch primero.</td></tr>';return;}
       throw new Error('HTTP '+res.status);
