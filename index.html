@@ -1886,7 +1886,7 @@ async function cargarControl(){
   msg.style.display='none';
   document.getElementById('ctrl-pie').style.display='none';
   try{
-    const res=await fetch(`${API_URL}/cumplimiento`);
+    const res=await fetch(`${API_URL}/robot/cumplimiento`);
     if(!res.ok){
       if(res.status===404){tbody.innerHTML='<tr><td colspan="7" style="padding:32px 12px;color:var(--ink-soft);text-align:center;">No hay datos de cumplimiento aún. Corre el batch primero.</td></tr>';return;}
       throw new Error('HTTP '+res.status);
