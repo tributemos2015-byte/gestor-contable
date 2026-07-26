@@ -201,7 +201,7 @@
     <a class="nav-item active" href="#" id="nav-dashboard" onclick="mostrarVista('dashboard');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Panel general</a>
     <a class="nav-item" href="#" id="nav-clientes" onclick="mostrarVista('clientes');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="18" cy="8" r="2.6"/><path d="M15.5 14.3c2.6.3 4.5 2.5 4.5 5.7"/></svg>Clientes</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="4" width="17" height="17" rx="2"/><path d="m7.5 12 2.3 2.3L16.5 9"/></svg>Tareas</a>
-    <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>Control de declaraciones</a>
+    <a class="nav-item" href="#" id="nav-control" onclick="mostrarVista('control');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/><path d="m13 17 2 2 3-3"/></svg>Control de declaraciones</a>
     <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>Vencimientos SUNAT</a>
     <a class="nav-item" href="#" id="nav-calendario" onclick="mostrarVista('calendario');return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>Calendario SUNAT</a>
 
@@ -757,6 +757,113 @@
       </div>
     </div>
 
+    <!-- ============ VISTA: CONTROL DE DECLARACIONES ============ -->
+    <div id="view-control" style="display:none;">
+
+      <div class="hero" style="margin-bottom:20px;">
+        <div>
+          <h1>Control de Declaraciones</h1>
+          <p>Estado de cumplimiento tributario de todos tus clientes activos.</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="ctrl-periodo-label" style="font-size:13px;color:var(--ink-soft);font-weight:600;"></span>
+          <button onclick="cargarControl()" style="display:flex;align-items:center;gap:7px;padding:9px 16px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.5 8.5 0 1 1-4-7.2"/><path d="M21 4v6h-6"/></svg>
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjetas resumen -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;">
+        <div class="stat-card tone-teal">
+          <div class="stat-head">📋 Esperadas</div>
+          <div class="stat-value num" id="ctrl-n-esperadas">—</div>
+          <div class="stat-sub">Declaraciones del periodo</div>
+        </div>
+        <div class="stat-card tone-green">
+          <div class="stat-head">✓ Presentadas</div>
+          <div class="stat-value num" id="ctrl-n-presentadas">—</div>
+          <div class="stat-sub">A tiempo o con pago</div>
+        </div>
+        <div class="stat-card tone-amber">
+          <div class="stat-head">⏳ Pendientes</div>
+          <div class="stat-value num" id="ctrl-n-pendientes">—</div>
+          <div class="stat-sub">Sin declarar aún</div>
+        </div>
+        <div class="stat-card tone-red">
+          <div class="stat-head">🚩 Con alertas</div>
+          <div class="stat-value num" id="ctrl-n-alertas">—</div>
+          <div class="stat-sub">Multas o embargos</div>
+        </div>
+        <div class="stat-card tone-primary">
+          <div class="stat-head">% Avance</div>
+          <div class="stat-value num" id="ctrl-pct">—</div>
+          <div class="stat-sub">Clientes al día</div>
+        </div>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;box-shadow:var(--shadow);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-size:13px;font-weight:700;">Progreso general del periodo</span>
+          <span id="ctrl-progreso-texto" style="font-size:13px;color:var(--ink-soft);font-weight:600;"></span>
+        </div>
+        <div style="height:10px;background:var(--line);border-radius:999px;overflow:hidden;">
+          <div id="ctrl-barra" style="height:100%;background:var(--green);border-radius:999px;width:0%;transition:width .5s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <div style="position:relative;flex:2;min-width:200px;">
+          <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;opacity:.4;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="ctrl-buscar" type="text" placeholder="Buscar por RUC o razón social..." oninput="filtrarControl()"
+            style="width:100%;padding:9px 11px 9px 33px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;">
+        </div>
+        <select id="ctrl-filtro-estado" onchange="filtrarControl()"
+          style="padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;min-width:170px;">
+          <option value="">Todos los estados</option>
+          <option value="ok">✓ Al día</option>
+          <option value="pendiente">⏳ Pendiente</option>
+          <option value="alerta">🚩 Con alertas</option>
+        </select>
+        <button onclick="exportarControlExcel()"
+          style="display:flex;align-items:center;gap:6px;padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>
+          Exportar Excel
+        </button>
+      </div>
+
+      <div id="ctrl-mensaje" style="display:none;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:14px;"></div>
+
+      <!-- Tabla -->
+      <div class="panel" style="padding:0;overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:#f8f7f4;text-align:left;border-bottom:2px solid var(--line);">
+                <th style="padding:10px 12px;white-space:nowrap;">Cliente / RUC</th>
+                <th style="padding:10px 12px;text-align:center;">IGV-Renta</th>
+                <th style="padding:10px 12px;text-align:center;">Fecha Pres.</th>
+                <th style="padding:10px 12px;text-align:center;">Planilla</th>
+                <th style="padding:10px 12px;text-align:right;">Monto IGV</th>
+                <th style="padding:10px 12px;">🚩 Alertas</th>
+                <th style="padding:10px 12px;text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="ctrl-tbody">
+              <tr><td colspan="7" style="padding:32px 12px;color:var(--ink-soft);text-align:center;">
+                Haz clic en "Actualizar" para cargar el último control.
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="ctrl-pie" style="margin-top:12px;font-size:12px;color:var(--ink-soft);text-align:right;display:none;"></div>
+    </div>
+    <!-- FIN VISTA CONTROL DE DECLARACIONES -->
+
     <!-- ============ VISTA: DECLARACIONES Y PAGOS (automático, robot SUNAT) ============ -->
     <div id="view-declpagos" style="display:none;">
       <div class="hero" style="margin-bottom:24px;">
@@ -881,6 +988,7 @@ function mostrarVista(vista){
   document.getElementById('view-declaraciones').style.display = vista === 'declaraciones' ? 'block' : 'none';
   document.getElementById('view-configuracion').style.display = vista === 'configuracion' ? 'block' : 'none';
   document.getElementById('view-declpagos').style.display = vista === 'declpagos' ? 'block' : 'none';
+  document.getElementById('view-control').style.display = vista === 'control' ? 'block' : 'none';
   document.getElementById('nav-dashboard').classList.toggle('active', vista === 'dashboard');
   document.getElementById('nav-clientes').classList.toggle('active', vista === 'clientes');
   document.getElementById('nav-buzonsol').classList.toggle('active', vista === 'buzonsol');
@@ -889,7 +997,9 @@ function mostrarVista(vista){
   document.getElementById('nav-tramites').classList.toggle('active', vista === 'tramites');
   document.getElementById('nav-declaraciones').classList.toggle('active', vista === 'declaraciones' || vista === 'declpagos');
   document.getElementById('nav-configuracion').classList.toggle('active', vista === 'configuracion');
+  document.getElementById('nav-control').classList.toggle('active', vista === 'control');
   if (vista === 'clientes') cargarClientes();
+  if (vista === 'control') cargarControl();
   if (vista === 'buzonsol') cargarNotificaciones();
   if (vista === 'buzonelectronico') cargarBuzonElectronico();
   if (vista === 'calendario') calRender();
@@ -1719,6 +1829,156 @@ function renderTimeline(lista){
       </div>
     </div>
   `).join('');
+}
+
+// ===== CONTROL DE DECLARACIONES =====
+let _ctrlDatos = null;
+
+const CTRL_MULTAS = new Set(['6041','6051','6061','6071','6075','6079','6083','6084','6085','6086','6087','6088','6089','6090','6111','6113','6114','6115','6116','6117','6118','6131','6132','6141','6142','6143','6151','6161','6191']);
+const CTRL_DETRACCION = new Set(['8073']);
+
+function _ctrlEstadoFila(r){
+  const ev=r.evaluacion;
+  if(!ev)return 'sin-datos';
+  if((ev.alertas||[]).length>0)return 'alerta';
+  if(ev.igvRenta&&ev.igvRenta.declarada)return 'ok';
+  return 'pendiente';
+}
+
+function _ctrlBadgeIgv(ev){
+  if(!ev||!ev.igvRenta)return '<span style="color:var(--ink-soft);">—</span>';
+  return ev.igvRenta.declarada
+    ?'<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:var(--green-tint);color:var(--green);font-weight:700;font-size:12px;">✓ Declarada</span>'
+    :'<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:var(--red-tint);color:var(--red);font-weight:700;font-size:12px;">✗ Pendiente</span>';
+}
+
+function _ctrlBadgePlanilla(r,ev){
+  if(!r.obligacionPlanilla)return '<span style="font-size:11.5px;color:var(--ink-soft);">No aplica</span>';
+  if(!ev||!ev.planilla)return '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:var(--red-tint);color:var(--red);font-weight:700;font-size:12px;">✗ Pendiente</span>';
+  return ev.planilla.declarada
+    ?'<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:var(--green-tint);color:var(--green);font-weight:700;font-size:12px;">✓ Declarada</span>'
+    :'<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:var(--red-tint);color:var(--red);font-weight:700;font-size:12px;">✗ Pendiente</span>';
+}
+
+function _ctrlAlertas(ev){
+  if(!ev||!ev.alertas||ev.alertas.length===0)return '<span style="color:var(--ink-soft);font-size:12px;">—</span>';
+  return ev.alertas.map(a=>{
+    const esMulTa=CTRL_MULTAS.has(a.codigoTributo);
+    const esDet=CTRL_DETRACCION.has(a.codigoTributo);
+    const color=esMulTa||esDet?'var(--red)':'var(--amber)';
+    const bg=esMulTa||esDet?'var(--red-tint)':'var(--amber-tint)';
+    const icon=esMulTa?'🚩':(esDet?'🔒':'⚠');
+    return `<span title="${escapeHtml(a.descripcionTributo||'')} — ${escapeHtml(a.importePagado||'')}" style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:5px;background:${bg};color:${color};font-weight:700;font-size:11px;margin:1px 2px;white-space:nowrap;">${icon} ${escapeHtml(a.codigoTributo||'')}</span>`;
+  }).join('');
+}
+
+function _ctrlMonto(ev){
+  if(!ev||!ev.igvRenta)return '—';
+  const t=ev.igvRenta.montoPagadoTotal;
+  if(t===null||t===undefined)return '—';
+  return 'S/ '+Number(t).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+async function cargarControl(){
+  const tbody=document.getElementById('ctrl-tbody');
+  const msg=document.getElementById('ctrl-mensaje');
+  tbody.innerHTML='<tr><td colspan="7" style="padding:32px 12px;color:var(--ink-soft);text-align:center;">⏳ Cargando datos...</td></tr>';
+  msg.style.display='none';
+  document.getElementById('ctrl-pie').style.display='none';
+  try{
+    const res=await fetch(`${API_URL}/cumplimiento`);
+    if(!res.ok){
+      if(res.status===404){tbody.innerHTML='<tr><td colspan="7" style="padding:32px 12px;color:var(--ink-soft);text-align:center;">No hay datos de cumplimiento aún. Corre el batch primero.</td></tr>';return;}
+      throw new Error('HTTP '+res.status);
+    }
+    const data=await res.json();
+    _ctrlDatos=data;
+    document.getElementById('ctrl-periodo-label').textContent='Periodo: '+(data.periodo||'');
+    const resultados=data.resultados||[];
+    let esperadas=0,presentadas=0,pendientes=0,conAlertas=0;
+    resultados.forEach(r=>{
+      if(!r.ok)return;
+      const ev=r.evaluacion;if(!ev)return;
+      esperadas++;
+      if(ev.igvRenta&&ev.igvRenta.declarada)presentadas++;else pendientes++;
+      if(ev.alertas&&ev.alertas.length>0)conAlertas++;
+    });
+    const pct=esperadas>0?Math.round(presentadas/esperadas*100):0;
+    document.getElementById('ctrl-n-esperadas').textContent=esperadas;
+    document.getElementById('ctrl-n-presentadas').textContent=presentadas;
+    document.getElementById('ctrl-n-pendientes').textContent=pendientes;
+    document.getElementById('ctrl-n-alertas').textContent=conAlertas;
+    document.getElementById('ctrl-pct').textContent=pct+'%';
+    const barra=document.getElementById('ctrl-barra');
+    barra.style.width=pct+'%';
+    barra.style.background=pct===100?'var(--green)':(pct>=70?'var(--amber)':'var(--red)');
+    document.getElementById('ctrl-progreso-texto').textContent=`${presentadas} de ${esperadas} clientes declararon IGV-Renta`;
+    const pie=document.getElementById('ctrl-pie');
+    pie.style.display='block';
+    const gen=data.generadoEn?new Date(data.generadoEn).toLocaleString('es-PE'):'—';
+    pie.textContent=`Datos generados: ${gen} · ${data.totalClientes||0} clientes activos procesados`;
+    filtrarControl();
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="7" style="padding:32px 12px;color:var(--red);text-align:center;">Error al cargar: '+escapeHtml(e.message)+'</td></tr>';
+  }
+}
+
+function filtrarControl(){
+  if(!_ctrlDatos)return;
+  const texto=(document.getElementById('ctrl-buscar').value||'').trim().toLowerCase();
+  const filtroEstado=document.getElementById('ctrl-filtro-estado').value;
+  const tbody=document.getElementById('ctrl-tbody');
+  const orden={'alerta':0,'pendiente':1,'sin-datos':2,'ok':3};
+  let filas=(_ctrlDatos.resultados||[]).filter(r=>{
+    const nombre=(r.razonSocial||'').toLowerCase();
+    const ruc=(r.ruc||'').toLowerCase();
+    const estado=_ctrlEstadoFila(r);
+    if(texto&&!nombre.includes(texto)&&!ruc.includes(texto))return false;
+    if(filtroEstado==='ok'&&estado!=='ok')return false;
+    if(filtroEstado==='pendiente'&&estado!=='pendiente')return false;
+    if(filtroEstado==='alerta'&&estado!=='alerta')return false;
+    return true;
+  }).sort((a,b)=>(orden[_ctrlEstadoFila(a)]||9)-(orden[_ctrlEstadoFila(b)]||9));
+  if(!filas.length){tbody.innerHTML='<tr><td colspan="7" style="padding:24px 12px;color:var(--ink-soft);text-align:center;">Sin resultados.</td></tr>';return;}
+  tbody.innerHTML=filas.map(r=>{
+    const estado=_ctrlEstadoFila(r);
+    const ev=r.evaluacion;
+    const rowBg=estado==='alerta'?'#FFF5F4':(estado==='pendiente'?'#FFFBF0':'#fff');
+    const borderLeft=estado==='alerta'?'3px solid var(--red)':(estado==='pendiente'?'3px solid var(--amber)':'3px solid transparent');
+    const fechaPres=ev&&ev.igvRenta&&ev.igvRenta.fechaPresentacion?ev.igvRenta.fechaPresentacion:'—';
+    return `<tr style="border-bottom:1px solid var(--line);background:${rowBg};border-left:${borderLeft};">
+      <td style="padding:11px 12px;">
+        <div style="font-weight:700;font-size:13.5px;">${escapeHtml(r.razonSocial||'—')}</div>
+        <div style="font-size:11.5px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;">${escapeHtml(r.ruc||'—')}</div>
+        ${!r.ok&&r.error?`<div style="font-size:11px;color:var(--red);margin-top:2px;">⚠ ${escapeHtml(r.error)}</div>`:''}
+      </td>
+      <td style="padding:11px 12px;text-align:center;">${_ctrlBadgeIgv(ev)}</td>
+      <td style="padding:11px 12px;text-align:center;font-size:12px;color:var(--ink-soft);">${escapeHtml(fechaPres)}</td>
+      <td style="padding:11px 12px;text-align:center;">${_ctrlBadgePlanilla(r,ev)}</td>
+      <td style="padding:11px 12px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12.5px;">${_ctrlMonto(ev)}</td>
+      <td style="padding:11px 12px;max-width:260px;">${_ctrlAlertas(ev)}</td>
+      <td style="padding:11px 12px;text-align:center;">
+        <button onclick="abrirConsultaDeclaraciones('${escapeHtml(r.clienteId||'')}')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;white-space:nowrap;">📊 Ver detalle</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function exportarControlExcel(){
+  if(!_ctrlDatos||!_ctrlDatos.resultados){alert('Primero carga los datos.');return;}
+  const filas=_ctrlDatos.resultados.map(r=>{
+    const ev=r.evaluacion;
+    const igv=ev&&ev.igvRenta;
+    const plan=ev&&ev.planilla;
+    const alertas=ev&&ev.alertas?ev.alertas.map(a=>a.codigoTributo+':'+(a.descripcionTributo||'')).join(' | '):'';
+    return{'Razón Social':r.razonSocial||'','RUC':r.ruc||'','Oblig. Planilla':r.obligacionPlanilla?'Sí':'No','IGV-Renta Declarada':igv?(igv.declarada?'Sí':'No'):'—','Fecha Presentación':igv?(igv.fechaPresentacion||'—'):'—','Monto Total':igv?(igv.montoPagadoTotal!==null?igv.montoPagadoTotal:'—'):'—','Planilla Declarada':r.obligacionPlanilla?(plan?(plan.declarada?'Sí':'No'):'No'):'N/A','Alertas':alertas||'—','Estado':_ctrlEstadoFila(r).toUpperCase(),'Error':r.error||''};
+  });
+  const ws=XLSX.utils.json_to_sheet(filas);
+  ws['!cols']=[{wch:35},{wch:13},{wch:15},{wch:18},{wch:20},{wch:15},{wch:18},{wch:45},{wch:12},{wch:30}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Control');
+  const periodo=(_ctrlDatos.periodo||'periodo').replace('-','');
+  XLSX.writeFile(wb,`ControlDeclaraciones_${periodo}.xlsx`);
 }
 
 // ===== CALENDARIO SUNAT 2026 =====
