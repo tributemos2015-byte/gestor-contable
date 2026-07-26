@@ -1448,11 +1448,23 @@ async function descargarPDTs() {
   msgEl.textContent = '⏳ El robot está entrando a SUNAT y capturando los PDTs y constancias. Esto puede tardar 2-5 minutos según la cantidad de declaraciones...';
 
   try {
-    // Obtener credenciales del cliente
-    const resC = await fetch(`${API_URL}/clientes/${clienteId}/credenciales`);
-    const cred = await resC.json();
-    if (!cred.ruc || !cred.usuario || !cred.clave) {
-      throw new Error('No se encontraron credenciales para este cliente.');
+    // Obtener credenciales del cliente desde memoria (_clientesTodos) 
+    // y como respaldo desde /credenciales
+    const clienteData = _clientesTodos.find(c => c.id === clienteId);
+    let ruc, usuario, clave;
+    try {
+      const resC = await fetch(`${API_URL}/clientes/${clienteId}/credenciales`);
+      const cred = await resC.json();
+      ruc     = cred.ruc     || (clienteData && clienteData.ruc);
+      usuario = cred.usuario || (clienteData && clienteData.usuarioSol);
+      clave   = cred.clave   || (clienteData && clienteData.claveSol);
+    } catch(e) {
+      ruc     = clienteData && clienteData.ruc;
+      usuario = clienteData && clienteData.usuarioSol;
+      clave   = clienteData && clienteData.claveSol;
+    }
+    if (!ruc || !usuario || !clave) {
+      throw new Error('No se encontraron credenciales SOL para este cliente.');
     }
 
     // Llamar al endpoint que devuelve el PDF binario
@@ -1460,9 +1472,9 @@ async function descargarPDTs() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ruc: cred.ruc,
-        usuario: cred.usuario,
-        clave: cred.clave,
+        ruc: ruc,
+        usuario: usuario,
+        clave: clave,
         desde: desde,
         hasta: hasta
       })
@@ -1478,7 +1490,7 @@ async function descargarPDTs() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `PDTs_Constancias_${cred.ruc}_${desde}_${hasta}.pdf`;
+    a.download = `PDTs_Constancias_${ruc}_${desde}_${hasta}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
