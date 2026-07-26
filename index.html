@@ -180,6 +180,7 @@
   .ag-text{font-size:12.5px;font-weight:600;color:var(--ink);}
 
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -728,7 +729,12 @@
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
-        <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="panel" style="display:flex;flex-direction:column;gap:12px;border:1.5px solid var(--amber);">
+          <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/><path d="m14 15 2 2 3-4"/></svg>Declaraciones y Pagos (automático)</div>
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">El robot consulta directamente en SUNAT y trae la tabla de declaraciones y pagos de un cliente, sin salir de GestorContable.</p>
+          <button onclick="mostrarVista('declpagos')" class="stat-btn" style="text-align:center;border:none;cursor:pointer;">📊 Ir a Declaraciones y Pagos →</button>
+        </div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:12px;">
           <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>PDT 621 — IGV / Renta</div>
           <p style="font-size:13px;color:var(--ink-soft);margin:0;">Declaración mensual de IGV y pagos a cuenta del Impuesto a la Renta.</p>
           <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22declaraciones%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
@@ -747,6 +753,61 @@
           <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Consulta de Declaraciones</div>
           <p style="font-size:13px;color:var(--ink-soft);margin:0;">Revisa el historial de declaraciones presentadas y sus estados.</p>
           <a href="https://e-menu.sunat.gob.pe/cl-ti-itmenu/MenuInternet.htm#pestana=%22consultas%22" target="_blank" class="stat-btn" style="text-align:center;">Abrir en SUNAT →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VISTA: DECLARACIONES Y PAGOS (automático, robot SUNAT) ============ -->
+    <div id="view-declpagos" style="display:none;">
+      <div class="hero" style="margin-bottom:24px;">
+        <div>
+          <h1>Declaraciones y Pagos</h1>
+          <p>El robot consulta directamente en SUNAT (Consulta general) y trae la tabla de declaraciones y pagos.</p>
+        </div>
+      </div>
+
+      <div class="panel" style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px;">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="flex:1;min-width:220px;">
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Cliente</label>
+            <select id="declpagos-cliente" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;box-sizing:border-box;">
+              <option value="">Cargando clientes...</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Desde</label>
+            <input type="month" id="declpagos-desde" style="border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;">
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:5px;">Hasta</label>
+            <input type="month" id="declpagos-hasta" style="border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;">
+          </div>
+          <button id="btn-declpagos-buscar" onclick="consultarDeclaracionesPagos()" style="border:none;background:var(--amber);color:#fff;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">🔄 Descargar desde SUNAT</button>
+          <button id="btn-declpagos-excel" onclick="exportarDeclaracionesExcel()" disabled style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;white-space:nowrap;opacity:0.5;" title="Primero descarga los datos desde SUNAT">📊 Exportar Excel</button>
+        </div>
+        <p style="font-size:12px;color:var(--ink-soft);margin:0;">SUNAT permite consultar un rango máximo de <b>6 meses</b> por búsqueda. La consulta tarda 30-90 segundos.</p>
+        <div id="declpagos-mensaje" style="display:none;font-size:13px;padding:10px 14px;border-radius:8px;"></div>
+      </div>
+
+      <div class="panel" style="padding:0;overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:var(--bg-soft, #f8f7f4);text-align:left;">
+                <th style="padding:10px 12px;">Periodo</th>
+                <th style="padding:10px 12px;">N° Form.</th>
+                <th style="padding:10px 12px;">N° Orden</th>
+                <th style="padding:10px 12px;">Descripción</th>
+                <th style="padding:10px 12px;">Fecha Pres.</th>
+                <th style="padding:10px 12px;">Banco</th>
+                <th style="padding:10px 12px;">Cód. Tributo</th>
+                <th style="padding:10px 12px;">Importe</th>
+              </tr>
+            </thead>
+            <tbody id="declpagos-tbody">
+              <tr><td colspan="8" style="padding:20px 12px;color:var(--ink-soft);">Elige un cliente y un rango de fechas, luego presiona "Descargar desde SUNAT".</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -819,19 +880,21 @@ function mostrarVista(vista){
   document.getElementById('view-tramites').style.display = vista === 'tramites' ? 'block' : 'none';
   document.getElementById('view-declaraciones').style.display = vista === 'declaraciones' ? 'block' : 'none';
   document.getElementById('view-configuracion').style.display = vista === 'configuracion' ? 'block' : 'none';
+  document.getElementById('view-declpagos').style.display = vista === 'declpagos' ? 'block' : 'none';
   document.getElementById('nav-dashboard').classList.toggle('active', vista === 'dashboard');
   document.getElementById('nav-clientes').classList.toggle('active', vista === 'clientes');
   document.getElementById('nav-buzonsol').classList.toggle('active', vista === 'buzonsol');
   document.getElementById('nav-buzonelectronico').classList.toggle('active', vista === 'buzonelectronico');
   document.getElementById('nav-calendario').classList.toggle('active', vista === 'calendario');
   document.getElementById('nav-tramites').classList.toggle('active', vista === 'tramites');
-  document.getElementById('nav-declaraciones').classList.toggle('active', vista === 'declaraciones');
+  document.getElementById('nav-declaraciones').classList.toggle('active', vista === 'declaraciones' || vista === 'declpagos');
   document.getElementById('nav-configuracion').classList.toggle('active', vista === 'configuracion');
   if (vista === 'clientes') cargarClientes();
   if (vista === 'buzonsol') cargarNotificaciones();
   if (vista === 'buzonelectronico') cargarBuzonElectronico();
   if (vista === 'calendario') calRender();
   if (vista === 'configuracion') cargarConfigCorreos();
+  if (vista === 'declpagos') poblarSelectorClientesDecl();
 }
 
 // ----- Modal nuevo cliente -----
@@ -882,7 +945,7 @@ function renderTablaClientes(clientes){
           <span class="tag" style="background:${c.activo ? 'var(--green-tint)' : 'var(--red-tint)'};color:${c.activo ? 'var(--green)' : 'var(--red)'};">${c.activo ? 'Activo' : 'Pausado'}</span>
         </td>
         <td style="padding:10px 8px;text-align:right;">
-          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:4px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button id="btn-ficha-${c.id}" onclick="descargarFichaRuc('${c.id}')" style="border:1px solid var(--primary);background:var(--primary-tint, #eef2ff);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--primary);font-weight:600;margin-right:6px;" title="Descargar Ficha RUC en PDF (tarda 1-2 min)">📄 Ficha RUC</button><button id="btn-reporte-${c.id}" onclick="solicitarReporteTributario('${c.id}')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:6px;" title="Solicitar Reporte Tributario para Terceros por correo (tarda 2-4 min)">📧 Reporte Trib.</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
+          <button onclick="abrirSunat('${c.id}','tramites')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:4px;" title="Mis Tramites y Consultas">🔑 Trámites</button><button onclick="abrirSunat('${c.id}','declaraciones')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:4px;" title="Mis Declaraciones y Pagos">📋 Declaraciones</button><button id="btn-ficha-${c.id}" onclick="descargarFichaRuc('${c.id}')" style="border:1px solid var(--primary);background:var(--primary-tint, #eef2ff);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--primary);font-weight:600;margin-right:6px;" title="Descargar Ficha RUC en PDF (tarda 1-2 min)">📄 Ficha RUC</button><button id="btn-reporte-${c.id}" onclick="solicitarReporteTributario('${c.id}')" style="border:1px solid var(--teal);background:var(--teal-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--teal);font-weight:600;margin-right:6px;" title="Solicitar Reporte Tributario para Terceros por correo (tarda 2-4 min)">📧 Reporte Trib.</button><button onclick="abrirConsultaDeclaraciones('${c.id}')" style="border:1px solid var(--amber);background:var(--amber-tint);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--amber);font-weight:600;margin-right:6px;" title="Consultar Declaraciones y Pagos automáticamente desde SUNAT">📊 Decl. y Pagos</button><button onclick="toggleActivo('${c.id}', ${!c.activo})" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;margin-right:6px;">${c.activo ? 'Pausar' : 'Activar'}</button>
           <button onclick="eliminarCliente('${c.id}')" style="border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--red);">Eliminar</button>
         </td>
       </tr>
@@ -1096,6 +1159,158 @@ async function solicitarReporteTributario(clienteId) {
     btn.disabled = false;
     btn.style.opacity = '1';
   }
+}
+
+// ===== DECLARACIONES Y PAGOS: consulta automática al robot SUNAT =====
+let _declpagosDatos = null; // guarda el ultimo resultado para exportar a Excel
+let _declpagosClienteInfo = null;
+
+function _declpagosDefaultFechas() {
+  const desdeInput = document.getElementById('declpagos-desde');
+  const hastaInput = document.getElementById('declpagos-hasta');
+  if (hastaInput.value && desdeInput.value) return;
+  const hoy = new Date();
+  const hastaStr = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+  const desdeDate = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+  const desdeStr = desdeDate.getFullYear() + '-' + String(desdeDate.getMonth() + 1).padStart(2, '0');
+  hastaInput.value = hastaStr;
+  desdeInput.value = desdeStr;
+}
+
+async function poblarSelectorClientesDecl(preseleccionarId) {
+  const sel = document.getElementById('declpagos-cliente');
+  _declpagosDefaultFechas();
+  try {
+    const res = await fetch(`${API_URL}/clientes`);
+    const clientes = await res.json();
+    clientes.sort((a, b) => (a.razonSocial || '').localeCompare(b.razonSocial || ''));
+    sel.innerHTML = '<option value="">-- Elige un cliente --</option>' +
+      clientes.map(c => `<option value="${c.id}">${escapeHtml(c.razonSocial)} — ${escapeHtml(c.ruc)}</option>`).join('');
+    if (preseleccionarId) sel.value = preseleccionarId;
+  } catch (e) {
+    sel.innerHTML = '<option value="">No se pudo cargar la lista de clientes</option>';
+  }
+}
+
+function abrirConsultaDeclaraciones(clienteId) {
+  mostrarVista('declpagos');
+  poblarSelectorClientesDecl(clienteId);
+}
+
+function _declpagosMostrarMensaje(texto, tipo) {
+  const box = document.getElementById('declpagos-mensaje');
+  box.style.display = 'block';
+  box.textContent = texto;
+  box.style.background = tipo === 'error' ? '#fdecea' : (tipo === 'ok' ? '#e8f5e9' : '#fff8e1');
+  box.style.color = tipo === 'error' ? '#c62828' : (tipo === 'ok' ? '#2e7d32' : '#8a6d00');
+}
+
+async function consultarDeclaracionesPagos() {
+  const clienteId = document.getElementById('declpagos-cliente').value;
+  const desde = document.getElementById('declpagos-desde').value; // "YYYY-MM"
+  const hasta = document.getElementById('declpagos-hasta').value;
+  const tbody = document.getElementById('declpagos-tbody');
+  const btn = document.getElementById('btn-declpagos-buscar');
+  const btnExcel = document.getElementById('btn-declpagos-excel');
+
+  if (!clienteId) { _declpagosMostrarMensaje('Elige un cliente primero.', 'error'); return; }
+  if (!desde || !hasta) { _declpagosMostrarMensaje('Elige el rango de fechas (desde y hasta).', 'error'); return; }
+
+  // Validacion del rango de 6 meses en el propio navegador (respuesta inmediata)
+  const [ay, am] = desde.split('-').map(Number);
+  const [hy, hm] = hasta.split('-').map(Number);
+  const totalMeses = (hy - ay) * 12 + (hm - am);
+  if (totalMeses < 0) { _declpagosMostrarMensaje('La fecha "Desde" no puede ser posterior a "Hasta".', 'error'); return; }
+  if (totalMeses > 5) { _declpagosMostrarMensaje('SUNAT permite un rango máximo de 6 meses por consulta. Achica el rango.', 'error'); return; }
+
+  const textoOriginal = btn.textContent;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.textContent = '⏳ Consultando SUNAT...';
+  btnExcel.disabled = true;
+  btnExcel.style.opacity = '0.5';
+  _declpagosMostrarMensaje('Consultando en SUNAT, esto tarda 30-90 segundos...', 'info');
+  tbody.innerHTML = '<tr><td colspan="8" style="padding:20px 12px;color:var(--ink-soft);">⏳ Consultando...</td></tr>';
+
+  try {
+    const resCred = await fetch(`${API_URL}/clientes/${clienteId}/credenciales`);
+    const creds = await resCred.json();
+
+    const res = await fetch(`${API_URL}/robot/declaraciones-pagos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ruc: creds.ruc,
+        usuario: creds.usuario || creds.usuarioSol,
+        clave: creds.clave || creds.claveSol,
+        desde, hasta
+      })
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      _declpagosMostrarMensaje('⚠️ ' + (data.error || 'No se pudo completar la consulta'), 'error');
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:20px 12px;color:var(--ink-soft);">Sin resultados.</td></tr>';
+      _declpagosDatos = null;
+      return;
+    }
+
+    _declpagosDatos = data.filas || [];
+    const selCliente = document.getElementById('declpagos-cliente');
+    _declpagosClienteInfo = { nombre: selCliente.options[selCliente.selectedIndex].text, ruc: data.ruc, desde, hasta };
+
+    if (_declpagosDatos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:20px 12px;color:var(--ink-soft);">No se encontraron declaraciones ni pagos en ese rango.</td></tr>';
+      _declpagosMostrarMensaje('Consulta completada: 0 registros en ese rango.', 'ok');
+    } else {
+      tbody.innerHTML = _declpagosDatos.map(f => `
+        <tr style="border-top:1px solid var(--line);">
+          <td style="padding:9px 12px;">${escapeHtml(f.periodo)}</td>
+          <td style="padding:9px 12px;">${escapeHtml(f.numeroFormulario)}</td>
+          <td style="padding:9px 12px;">${escapeHtml(f.numeroOrden)}</td>
+          <td style="padding:9px 12px;">${escapeHtml(f.descripcion)}</td>
+          <td style="padding:9px 12px;">${escapeHtml(f.fechaPresentacion)}</td>
+          <td style="padding:9px 12px;">${escapeHtml(f.bancoReceptor)}</td>
+          <td style="padding:9px 12px;">${escapeHtml(f.codigoTributo)}</td>
+          <td style="padding:9px 12px;">${escapeHtml(f.importePagado)}</td>
+        </tr>`).join('');
+      _declpagosMostrarMensaje(`✅ Consulta completada: ${_declpagosDatos.length} registro(s) encontrado(s).`, 'ok');
+      btnExcel.disabled = false;
+      btnExcel.style.opacity = '1';
+    }
+  } catch (e) {
+    _declpagosMostrarMensaje('Error de conexión con el robot: ' + e.message, 'error');
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:20px 12px;color:var(--ink-soft);">Sin resultados.</td></tr>';
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = textoOriginal;
+  }
+}
+
+function exportarDeclaracionesExcel() {
+  if (!_declpagosDatos || _declpagosDatos.length === 0) {
+    alert('Primero descarga los datos desde SUNAT.');
+    return;
+  }
+  const filasExcel = _declpagosDatos.map(f => ({
+    'Periodo': f.periodo,
+    'N° Formulario': f.numeroFormulario,
+    'N° Orden': f.numeroOrden,
+    'Descripción': f.descripcion,
+    'Fecha de Presentación': f.fechaPresentacion,
+    'Banco Receptor': f.bancoReceptor,
+    'Código Tributo': f.codigoTributo,
+    'Descripción Tributo': f.descripcionTributo,
+    'Importe Pagado': f.importePagado
+  }));
+  const ws = XLSX.utils.json_to_sheet(filasExcel);
+  ws['!cols'] = [{wch:9},{wch:11},{wch:14},{wch:32},{wch:14},{wch:16},{wch:12},{wch:22},{wch:13}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Declaraciones y Pagos');
+  const info = _declpagosClienteInfo || {};
+  const nombreArchivo = `DeclaracionesPagos_${(info.ruc||'ruc')}_${(info.desde||'')}_a_${(info.hasta||'')}.xlsx`;
+  XLSX.writeFile(wb, nombreArchivo);
 }
 
 async function eliminarCliente(id){
